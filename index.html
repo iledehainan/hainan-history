@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f3ed">
+  <title>琼史·海南历史速查</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #202e2b;
+      --muted: #6e7973;
+      --paper: #f6f3ed;
+      --card: #fffefa;
+      --green: #174c3c;
+      --green-light: #e3eee7;
+      --orange: #bd6841;
+      --line: #e7e4dc;
+      font-family: "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .page { max-width: 1160px; padding: 28px 28px 64px; margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 54px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: .04em; }
+    .brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px 12px 12px 3px; color: white; background: var(--green); font-family: Georgia, serif; font-size: 21px; }
+    .top-note { color: var(--muted); font-size: 13px; }
+    .hero { position: relative; overflow: hidden; padding: 0 0 36px; }
+    .hero::after { content: "琼"; position: absolute; z-index: -1; right: 4%; top: -105px; color: #ebe9df; font-family: serif; font-size: 340px; line-height: 1; }
+    .eyebrow { color: var(--orange); font-size: 12px; font-weight: 750; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 13px 0 12px; font-family: Georgia, "Noto Serif CJK SC", serif; font-size: clamp(40px, 7vw, 68px); font-weight: 650; letter-spacing: .02em; }
+    .intro { max-width: 580px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.9; }
+    .search-wrap { display: flex; align-items: center; gap: 12px; max-width: 730px; margin-top: 27px; padding: 8px 9px 8px 17px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); box-shadow: 0 8px 24px #25382a0a; }
+    .search-icon { color: var(--green); font-size: 21px; }
+    .search-wrap input { flex: 1; min-width: 0; padding: 8px 0; border: 0; outline: 0; color: var(--ink); background: transparent; }
+    .search-wrap input::placeholder { color: #9ba19b; }
+    .shortcut { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-size: 11px; }
+    .stats { display: flex; gap: 27px; margin-top: 24px; color: var(--muted); font-size: 12px; }
+    .stats strong { margin-right: 5px; color: var(--green); font-size: 16px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 13px 0 17px; }
+    h2 { margin: 0; font-size: 20px; letter-spacing: .02em; }
+    .result-count { color: var(--muted); font-size: 13px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+    .filter { padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; color: #59645e; background: transparent; font-size: 12px; transition: .15s ease; }
+    .filter:hover { border-color: #a9b8ac; }
+    .filter[aria-pressed="true"] { border-color: var(--green); color: white; background: var(--green); }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .type-tabs { display: flex; gap: 17px; }
+    .type-tab { padding: 3px 0 6px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: none; font-size: 13px; }
+    .type-tab[aria-pressed="true"] { border-color: var(--orange); color: var(--ink); font-weight: 700; }
+    .sort-label { color: var(--muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .entry { display: flex; flex-direction: column; min-height: 222px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); transition: transform .16s ease, box-shadow .16s ease; }
+    .entry:hover { transform: translateY(-3px); box-shadow: 0 12px 28px #24372b0d; }
+    .entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .tag { padding: 5px 8px; border-radius: 5px; color: var(--green); background: var(--green-light); font-size: 11px; }
+    .tag.event { color: #985536; background: #f6e9df; }
+    .date { color: #808981; font-size: 11px; }
+    .entry h3 { margin: 17px 0 8px; font-size: 17px; line-height: 1.45; }
+    .entry p { display: -webkit-box; overflow: hidden; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+    .entry-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 15px; }
+    .place { color: #858d86; font-size: 11px; }
+    .detail-link { padding: 0; border: 0; color: var(--green); background: none; font-size: 12px; font-weight: 700; }
+    .empty { grid-column: 1 / -1; padding: 48px 16px; border: 1px dashed #d8d7ce; border-radius: 12px; color: var(--muted); text-align: center; line-height: 1.8; }
+    footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: #8a918b; font-size: 11px; line-height: 1.8; }
+    dialog { width: min(540px, calc(100% - 32px)); padding: 0; border: 1px solid var(--line); border-radius: 14px; color: var(--ink); background: var(--card); box-shadow: 0 20px 80px #12251f30; }
+    dialog::backdrop { background: #18251f88; backdrop-filter: blur(2px); }
+    .dialog-inner { padding: 27px; }
+    .dialog-top { display: flex; justify-content: space-between; gap: 14px; align-items: start; }
+    .dialog-inner h2 { margin: 16px 0 10px; font-size: 24px; line-height: 1.4; }
+    .dialog-inner p { color: var(--muted); font-size: 14px; line-height: 1.9; }
+    .dialog-close { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: white; font-size: 18px; }
+    .source-note { margin-top: 23px; padding-top: 14px; border-top: 1px solid var(--line); color: #848d86; font-size: 11px; line-height: 1.7; }
+    @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar { margin-bottom: 40px; } }
+    @media (max-width: 540px) {
+      .page { padding: 20px 17px 44px; }
+      .topbar { margin-bottom: 38px; }
+      .top-note { max-width: 150px; text-align: right; line-height: 1.5; }
+      .hero::after { right: -32px; top: -48px; font-size: 240px; }
+      .intro { max-width: 90%; font-size: 14px; }
+      .shortcut { display: none; }
+      .stats { gap: 17px; }
+      .grid { grid-template-columns: 1fr; }
+      .entry { min-height: 195px; }
+      .toolbar { align-items: start; flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">琼</span><span>琼史 · QIONG HISTORY</span></div>
+      <div class="top-note">一座海岛的历史速查手册</div>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="eyebrow">Hainan · People &amp; Events</div>
+      <h1 id="page-title">读懂海南，<br>从历史开始。</h1>
+      <p class="intro">从珠崖郡到自由贸易港，按历史时期快速查找海南的重要人物与大事件。</p>
+      <label class="search-wrap">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <input id="search" type="search" placeholder="试试搜索：海瑞、苏轼、琼崖纵队……" autocomplete="off" aria-label="搜索人物、事件或关键词">
+        <span class="shortcut">实时搜索</span>
+      </label>
+      <div class="stats" aria-label="内容统计">
+        <span><strong id="item-total">0</strong>条历史条目</span>
+        <span><strong id="era-total">0</strong>个时期</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="timeline-heading">
+      <div class="section-head">
+        <h2 id="timeline-heading">沿着时间，探索琼州</h2>
+        <span class="result-count" id="result-count" aria-live="polite"></span>
+      </div>
+      <nav class="filters" id="era-filters" aria-label="按历史时期筛选"></nav>
+      <div class="toolbar">
+        <div class="type-tabs" aria-label="按条目类型筛选">
+          <button class="type-tab" data-type="all" aria-pressed="true">全部条目</button>
+          <button class="type-tab" data-type="person" aria-pressed="false">历史人物</button>
+          <button class="type-tab" data-type="event" aria-pressed="false">重要事件</button>
+        </div>
+        <span class="sort-label">按时间顺序排列</span>
+      </div>
+      <div class="grid" id="results"></div>
+    </section>
+    <footer>本页为入门级历史索引，年代与人物简介作概览使用。涉及复杂历史背景或不同史料说法时，建议结合地方志、正史及专题研究进一步核对。</footer>
+  </main>
+
+  <dialog id="detail-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-inner">
+      <div class="dialog-top">
+        <div>
+          <span class="tag" id="dialog-tag"></span>
+          <h2 id="dialog-title"></h2>
+          <span class="date" id="dialog-date"></span>
+        </div>
+        <button class="dialog-close" id="dialog-close" aria-label="关闭详情">×</button>
+      </div>
+      <p id="dialog-description"></p>
+      <div class="source-note" id="dialog-note"></div>
+    </div>
+  </dialog>
+
+  <script>
+    const periods = ["全部时期", "先秦至汉", "魏晋至宋元", "明清时期", "近现代", "当代"];
+    const items = [
+      { id: "han-commandery", period: "先秦至汉", type: "event", date: "公元前110年", title: "汉武帝设珠崖、儋耳郡", place: "海南岛", summary: "汉武帝元鼎六年，中央王朝在海南岛设置珠崖郡、儋耳郡，标志着对海南的郡县治理开始。", detail: "西汉在海南岛设置珠崖、儋耳两郡，郡县治所与辖境历来有史料考订。汉昭帝始元五年（公元前82年），珠崖郡因地方局势等原因被撤并。此后历代对海南的建置与实际治理多有变化。", note: "公元前110年为通行纪年，具体建置沿革可参照《汉书·地理志》及海南地方志。" },
+      { id: "zhuya-abolished", period: "先秦至汉", type: "event", date: "公元前82年", title: "西汉撤并珠崖郡", place: "珠崖郡", summary: "汉昭帝时期，朝廷撤销珠崖郡，海南的郡县建置经历调整，反映早期治理并非一成不变。", detail: "据《汉书·昭帝纪》等记载，始元五年（公元前82年）撤销珠崖郡。海南与中原王朝之间的治理关系在不同阶段有所起伏，后世又陆续恢复或调整相关行政设置。", note: "条目以《汉书》纪年为据；早期岛内治理范围及行政细节仍需结合专门史研究。" },
+      { id: "su-shi", period: "魏晋至宋元", type: "person", date: "1037—1101年", title: "苏轼谪居儋州", place: "儋州", summary: "北宋文学家苏轼于绍圣四年（1097年）被贬至儋州，三年后遇赦北归，其经历深刻影响海南文化记忆。", detail: "苏轼贬居儋州期间讲学、交游并留下诗文。海南地方传统常将他与当地教育、文化发展联系起来；相关影响值得了解，但不宜简单归结为一人“开化”当地。", note: "苏轼生卒年为1037—1101年；谪居儋州约为1097—1100年。" },
+      { id: "qiu-jun", period: "明清时期", type: "person", date: "1421—1495年", title: "丘濬：琼山学者与政治家", place: "琼山（今海口）", summary: "丘濬是明代海南重要学者、政治家，著述涉及经史、经济与典章制度，是海南文化史上的代表人物。", detail: "丘濬字仲深，号琼台，琼山人。入仕后官至礼部尚书、文渊阁大学士，著有《大学衍义补》等。其生平体现了明代海南士人通过科举与仕宦进入国家政治文化体系的路径。", note: "人物信息可参照《明史》及海南地方志。" },
+      { id: "hai-rui", period: "明清时期", type: "person", date: "1514—1587年", title: "海瑞：刚直敢谏的海南名臣", place: "琼山（今海口）", summary: "海瑞是明代政治人物，以廉洁、敢于直言闻名，后世常称“海青天”。", detail: "海瑞字汝贤，号刚峰，海南琼山人。曾任淳安知县、应天巡抚等职，以整饬吏治、直言进谏著称。其形象在后世戏曲、文学与民间记忆中不断发展。", note: "人物介绍依据通行史实；民间故事与文学塑造不等同于史料记载。" },
+      { id: "qiongzhou-prefecture", period: "明清时期", type: "event", date: "明洪武初年", title: "琼州府建置逐步稳定", place: "琼州", summary: "明代海南以琼州府为重要行政中心，府县建置逐步发展，岛屿治理与地方社会联系进一步加强。", detail: "明初对海南行政区划作出调整，琼州府成为岛上重要的行政中心。府县体系、移民垦殖、海防与地方社会发展共同塑造了此后的海南历史。具体设府年份在不同沿革记述中略有表述差异。", note: "行政沿革宜结合明代史籍和地方志核对，本条避免将建置变化简化为单一日期。" },
+      { id: "japanese-occupation", period: "近现代", type: "event", date: "1939年2月", title: "日军侵占海南岛", place: "海南岛", summary: "1939年日军登陆海南岛并逐步扩大占领，海南进入战时统治与抗日斗争时期。", detail: "日军于1939年登陆海南岛，随后控制岛上重要城镇、交通与资源。各地抗日力量持续开展斗争，琼崖抗日武装是当地抗战的重要组成部分。战时经历给海南社会造成深刻影响。", note: "事件日期与过程可参照抗战史和海南地方史资料。" },
+      { id: "feng-baiju", period: "近现代", type: "person", date: "1903—1973年", title: "冯白驹：琼崖革命重要领导人", place: "琼山（今海口）", summary: "冯白驹是琼崖革命与抗日斗争的重要领导者，长期在海南组织和领导革命活动。", detail: "冯白驹出生于琼山县（今海口市琼山区），是琼崖革命根据地的重要领导人之一。琼崖革命武装在长期斗争中逐渐发展，并参与抗日战争及解放战争。", note: "人物介绍为简要概览，可进一步查阅海南党史和地方志资料。" },
+      { id: "qiongya-column", period: "近现代", type: "event", date: "1927—1950年", title: "琼崖革命根据地长期坚持斗争", place: "海南岛", summary: "琼崖革命力量在复杂环境中开展长期斗争，抗日战争时期发展为琼崖抗日武装，成为海南近现代史的重要篇章。", detail: "琼崖革命斗争历经土地革命战争、抗日战争和解放战争等阶段。不同阶段的组织形态与政治任务有所变化；“二十三年红旗不倒”是对其长期坚持斗争的概括性表述。", note: "时间范围采用常见概括，具体阶段和起止点依研究口径可能有所不同。" },
+      { id: "hainan-liberation", period: "近现代", type: "event", date: "1950年4—5月", title: "海南岛战役与海南解放", place: "海南岛", summary: "1950年春，中国人民解放军渡海登陆；5月海南岛全境纳入新中国政权治理。", detail: "海南岛战役中，解放军分批渡海登陆，与琼崖纵队等力量会合并推进作战。1950年5月1日，海南岛全境解放。此后海南岛行政上隶属广东省。", note: "战役经过和日期可参照军事史及海南地方史资料。" },
+      { id: "hainan-province", period: "当代", type: "event", date: "1988年4月13日", title: "海南建省并设立经济特区", place: "海南省", summary: "全国人大通过设立海南省和海南经济特区的决定，海南成为中国最年轻的省级行政区之一。", detail: "1988年4月13日，第七届全国人民代表大会第一次会议通过设立海南省、建立海南经济特区的决定。海南由广东省划出，开始以省级建制推进改革开放与经济建设。", note: "日期依据全国人大相关决定。" },
+      { id: "free-trade-port", period: "当代", type: "event", date: "2018—2020年", title: "海南自由贸易港建设启动", place: "海南省", summary: "2018年提出支持海南全面深化改革开放；2020年发布海南自由贸易港建设总体方案。", detail: "2018年，中央提出支持海南全面深化改革开放，并支持海南全岛建设自由贸易试验区、探索建设自由贸易港。2020年6月，《海南自由贸易港建设总体方案》发布，明确了建设目标与阶段安排。", note: "政策进展以公开发布的中央文件为准。" }
+    ];
+
+    const results = document.querySelector("#results");
+    const search = document.querySelector("#search");
+    const resultCount = document.querySelector("#result-count");
+    const eraFilters = document.querySelector("#era-filters");
+    const dialog = document.querySelector("#detail-dialog");
+    let selectedPeriod = "全部时期";
+    let selectedType = "all";
+
+    document.querySelector("#item-total").textContent = items.length;
+    document.querySelector("#era-total").textContent = new Set(items.map(item => item.period)).size;
+
+    for (const period of periods) {
+      const button = document.createElement("button");
+      button.className = "filter";
+      button.textContent = period;
+      button.setAttribute("aria-pressed", String(period === selectedPeriod));
+      button.addEventListener("click", () => {
+        selectedPeriod = period;
+        eraFilters.querySelectorAll(".filter").forEach(filter => filter.setAttribute("aria-pressed", String(filter === button)));
+        render();
+      });
+      eraFilters.append(button);
+    }
+
+    document.querySelectorAll(".type-tab").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedType = button.dataset.type;
+        document.querySelectorAll(".type-tab").forEach(tab => tab.setAttribute("aria-pressed", String(tab === button)));
+        render();
+      });
+    });
+    search.addEventListener("input", render);
+
+    function render() {
+      const query = search.value.trim().toLocaleLowerCase("zh-CN");
+      const filtered = items.filter(item => {
+        const matchesPeriod = selectedPeriod === "全部时期" || item.period === selectedPeriod;
+        const matchesType = selectedType === "all" || item.type === selectedType;
+        const searchable = [item.title, item.period, item.date, item.place, item.summary, item.detail].join(" ").toLocaleLowerCase("zh-CN");
+        return matchesPeriod && matchesType && searchable.includes(query);
+      });
+      resultCount.textContent = `找到 ${filtered.length} 条`;
+      results.replaceChildren();
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "没有找到相关条目。试试更短的关键词，或切换历史时期。";
+        results.append(empty);
+        return;
+      }
+      for (const item of filtered) {
+        const article = document.createElement("article");
+        article.className = "entry";
+        const top = document.createElement("div");
+        top.className = "entry-top";
+        const tag = document.createElement("span");
+        tag.className = `tag${item.type === "event" ? " event" : ""}`;
+        tag.textContent = item.type === "person" ? "历史人物" : "重要事件";
+        const date = document.createElement("span");
+        date.className = "date";
+        date.textContent = item.date;
+        top.append(tag, date);
+        const title = document.createElement("h3");
+        title.textContent = item.title;
+        const summary = document.createElement("p");
+        summary.textContent = item.summary;
+        const bottom = document.createElement("div");
+        bottom.className = "entry-bottom";
+        const place = document.createElement("span");
+        place.className = "place";
+        place.textContent = `${item.period} · ${item.place}`;
+        const detailButton = document.createElement("button");
+        detailButton.className = "detail-link";
+        detailButton.textContent = "查看详情 →";
+        detailButton.addEventListener("click", () => showDetail(item));
+        bottom.append(place, detailButton);
+        article.append(top, title, summary, bottom);
+        results.append(article);
+      }
+    }
+
+    function showDetail(item) {
+      document.querySelector("#dialog-tag").textContent = `${item.period} · ${item.type === "person" ? "历史人物" : "重要事件"}`;
+      document.querySelector("#dialog-title").textContent = item.title;
+      document.querySelector("#dialog-date").textContent = `${item.date}  ·  ${item.place}`;
+      document.querySelector("#dialog-description").textContent = item.detail;
+      document.querySelector("#dialog-note").textContent = item.note;
+      dialog.showModal();
+    }
+
+    document.querySelector("#dialog-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
+    render();
+  </script>
+</body>
+</html>
