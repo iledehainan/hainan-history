@@ -83,12 +83,12 @@
         </form>
         <div class="import-box">
           <h2>批量导入 CSV</h2>
-          <p class="muted">CSV 表头必须包含 <code>year,period,type,date,title,place,summary,detail</code>；可选列：<code>source,source_url</code>。条目类别可用 person、event、trade、place、artifact。建议先导入少量样例并检查显示效果。<a href="./history-import-template.csv" download>下载含南海贸易示例的 CSV 模板</a></p>
+          <p class="muted">CSV 表头必须包含 <code>year,period,type,date,title,place,summary,detail</code>；可选列：<code>source,source_url</code>。条目类别可用 person、event、trade、place、artifact。建议先导入少量样例并检查显示效果。<a href="./history-import-template.csv" download>下载含南海贸易示例的 CSV 模板</a> · <a href="./history-architecture-import.csv" download>下载历史建筑、古迹与村落资料（10条，请勿重复导入）</a></p>
           <label>选择 UTF-8 CSV 文件<input id="csv-file" type="file" accept=".csv,text/csv"></label>
           <div class="actions"><button class="button" id="import-csv" type="button">导入所选文件</button></div>
         </div>
       </div>
-      <p class="muted">“网站约”包含17条内置资料；如把同名内置资料再次导入，主页会合并显示，但云端数量仍会单独计数。</p>
+      <p class="muted">“网站约”包含27条内置资料；如把同名内置资料再次导入，主页会合并显示，但云端数量仍会单独计数。</p>
       <div class="toolbar">
         <h2 style="margin:0">云端资料：<span id="entry-count">0</span> 条</h2>
         <button class="button" id="sign-out" type="button">退出登录</button>
@@ -166,7 +166,7 @@
       const { data, error, count } = await client.from("history_entries")
         .select("*", { count: "exact" }).order("year").order("title").limit(1000);
       if (error) return message(`读取资料失败：${error.message}`, true);
-      const total = 17 + data.length;
+      const total = 27 + data.length;
       const missing = Math.max(0, 500 - total);
       document.querySelector("#entry-count").textContent = `${count ?? data.length} · 网站约 ${total} 条，距离500条还差 ${missing} 条`;
       list.replaceChildren();

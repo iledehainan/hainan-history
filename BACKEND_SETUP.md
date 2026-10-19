@@ -38,4 +38,4 @@ year,period,type,date,title,place,summary,detail,source,source_url
 - `type` 必须为 `person`、`event`、`trade`、`place` 或 `artifact`，分别表示人物、事件、航线与贸易、港口与遗址、文献与器物。
 - 每条资料建议填写可核查的 `source`；存在公开来源网页时填写 `source_url`。
 
-项目新建后，数据库内容为空；现有网页仍显示内置的 12 条入门资料。可在管理员后台逐条添加，或使用批量导入功能。批量上传前请检查资料来源、年代及重复项。
+项目新建后，数据库内容为空；现有网页显示 27 条内置资料（含历史建筑、古迹与村落条目）。可在管理员后台逐条添加，或使用批量导入功能。管理员后台提供 `history-architecture-import.csv`，可将这批10条资料加入云端；请只导入一次，并在导入前核对资料来源、年代及重复项。

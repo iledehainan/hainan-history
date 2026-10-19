@@ -147,6 +147,7 @@
   <script type="module">
     import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
     import { maritimeEntries } from "./maritime-history.js";
+    import { architectureEntries } from "./architecture-history.js";
     const periods = ["全部时期", "先秦至汉", "魏晋至宋元", "明清时期", "近现代", "当代"];
     let items = [
       { id: "han-commandery", period: "先秦至汉", type: "event", date: "公元前110年", title: "汉武帝设珠崖、儋耳郡", place: "海南岛", summary: "汉武帝元鼎六年，中央王朝在海南岛设置珠崖郡、儋耳郡，标志着对海南的郡县治理开始。", detail: "西汉在海南岛设置珠崖、儋耳两郡，郡县治所与辖境历来有史料考订。汉昭帝始元五年（公元前82年），珠崖郡因地方局势等原因被撤并。此后历代对海南的建置与实际治理多有变化。", note: "公元前110年为通行纪年，具体建置沿革可参照《汉书·地理志》及海南地方志。" },
@@ -177,7 +178,7 @@
       "free-trade-port": 2018
     };
     items.forEach(item => { item.year ??= knownYears[item.id] ?? 999999; });
-    items = [...items, ...maritimeEntries];
+    items = [...items, ...maritimeEntries, ...architectureEntries];
 
     const results = document.querySelector("#results");
     const search = document.querySelector("#search");
