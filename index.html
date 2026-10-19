@@ -47,7 +47,7 @@
     .filter:hover { border-color: #a9b8ac; }
     .filter[aria-pressed="true"] { border-color: var(--green); color: white; background: var(--green); }
     .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .type-tabs { display: flex; gap: 17px; }
+    .type-tabs { display: flex; flex-wrap: wrap; gap: 12px 17px; }
     .type-tab { padding: 3px 0 6px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: none; font-size: 13px; }
     .type-tab[aria-pressed="true"] { border-color: var(--orange); color: var(--ink); font-weight: 700; }
     .sort-label { color: var(--muted); font-size: 12px; }
@@ -144,9 +144,11 @@
     </div>
   </dialog>
 
-  <script>
+  <script type="module">
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
+    import { maritimeEntries } from "./maritime-history.js";
     const periods = ["全部时期", "先秦至汉", "魏晋至宋元", "明清时期", "近现代", "当代"];
-    const items = [
+    let items = [
       { id: "han-commandery", period: "先秦至汉", type: "event", date: "公元前110年", title: "汉武帝设珠崖、儋耳郡", place: "海南岛", summary: "汉武帝元鼎六年，中央王朝在海南岛设置珠崖郡、儋耳郡，标志着对海南的郡县治理开始。", detail: "西汉在海南岛设置珠崖、儋耳两郡，郡县治所与辖境历来有史料考订。汉昭帝始元五年（公元前82年），珠崖郡因地方局势等原因被撤并。此后历代对海南的建置与实际治理多有变化。", note: "公元前110年为通行纪年，具体建置沿革可参照《汉书·地理志》及海南地方志。" },
       { id: "zhuya-abolished", period: "先秦至汉", type: "event", date: "公元前82年", title: "西汉撤并珠崖郡", place: "珠崖郡", summary: "汉昭帝时期，朝廷撤销珠崖郡，海南的郡县建置经历调整，反映早期治理并非一成不变。", detail: "据《汉书·昭帝纪》等记载，始元五年（公元前82年）撤销珠崖郡。海南与中原王朝之间的治理关系在不同阶段有所起伏，后世又陆续恢复或调整相关行政设置。", note: "条目以《汉书》纪年为据；早期岛内治理范围及行政细节仍需结合专门史研究。" },
       { id: "su-shi", period: "魏晋至宋元", type: "person", date: "1037—1101年", title: "苏轼谪居儋州", place: "儋州", summary: "北宋文学家苏轼于绍圣四年（1097年）被贬至儋州，三年后遇赦北归，其经历深刻影响海南文化记忆。", detail: "苏轼贬居儋州期间讲学、交游并留下诗文。海南地方传统常将他与当地教育、文化发展联系起来；相关影响值得了解，但不宜简单归结为一人“开化”当地。", note: "苏轼生卒年为1037—1101年；谪居儋州约为1097—1100年。" },
@@ -160,6 +162,22 @@
       { id: "hainan-province", period: "当代", type: "event", date: "1988年4月13日", title: "海南建省并设立经济特区", place: "海南省", summary: "全国人大通过设立海南省和海南经济特区的决定，海南成为中国最年轻的省级行政区之一。", detail: "1988年4月13日，第七届全国人民代表大会第一次会议通过设立海南省、建立海南经济特区的决定。海南由广东省划出，开始以省级建制推进改革开放与经济建设。", note: "日期依据全国人大相关决定。" },
       { id: "free-trade-port", period: "当代", type: "event", date: "2018—2020年", title: "海南自由贸易港建设启动", place: "海南省", summary: "2018年提出支持海南全面深化改革开放；2020年发布海南自由贸易港建设总体方案。", detail: "2018年，中央提出支持海南全面深化改革开放，并支持海南全岛建设自由贸易试验区、探索建设自由贸易港。2020年6月，《海南自由贸易港建设总体方案》发布，明确了建设目标与阶段安排。", note: "政策进展以公开发布的中央文件为准。" }
     ];
+    const knownYears = {
+      "han-commandery": -110,
+      "zhuya-abolished": -82,
+      "su-shi": 1097,
+      "qiu-jun": 1421,
+      "hai-rui": 1514,
+      "qiongzhou-prefecture": 1370,
+      "japanese-occupation": 1939,
+      "feng-baiju": 1903,
+      "qiongya-column": 1927,
+      "hainan-liberation": 1950,
+      "hainan-province": 1988,
+      "free-trade-port": 2018
+    };
+    items.forEach(item => { item.year ??= knownYears[item.id] ?? 999999; });
+    items = [...items, ...maritimeEntries];
 
     const results = document.querySelector("#results");
     const search = document.querySelector("#search");
@@ -168,8 +186,41 @@
     const dialog = document.querySelector("#detail-dialog");
     let selectedPeriod = "全部时期";
     let selectedType = "all";
+    const localItems = items.slice();
+    const status = document.createElement("span");
+    status.className = "result-count";
+    status.style.display = "block";
+    status.style.marginTop = "10px";
+    document.querySelector(".stats").after(status);
+    const adminLink = document.createElement("a");
+    adminLink.href = "./admin.html";
+    adminLink.textContent = "资料管理";
+    adminLink.style.cssText = "color:#174c3c;font-size:12px;text-decoration:none";
+    document.querySelector(".topbar").append(adminLink);
 
-    document.querySelector("#item-total").textContent = items.length;
+    const typeNames = {
+      all: "全部条目",
+      person: "历史人物",
+      event: "重要事件",
+      trade: "航线与贸易",
+      place: "港口与遗址",
+      artifact: "文献与器物"
+    };
+    const tabs = document.querySelector(".type-tabs");
+    for (const [type, name] of Object.entries(typeNames).slice(3)) {
+      const button = document.createElement("button");
+      button.className = "type-tab";
+      button.dataset.type = type;
+      button.textContent = name;
+      button.setAttribute("aria-pressed", "false");
+      tabs.append(button);
+      button.addEventListener("click", () => {
+        selectedType = type;
+        tabs.querySelectorAll(".type-tab").forEach(tab => tab.setAttribute("aria-pressed", String(tab === button)));
+        render();
+      });
+    }
+
     document.querySelector("#era-total").textContent = new Set(items.map(item => item.period)).size;
 
     for (const period of periods) {
@@ -196,12 +247,13 @@
 
     function render() {
       const query = search.value.trim().toLocaleLowerCase("zh-CN");
-      const filtered = items.filter(item => {
+      const filtered = items.slice().sort((a, b) => (a.year ?? sortYear(a)) - (b.year ?? sortYear(b))).filter(item => {
         const matchesPeriod = selectedPeriod === "全部时期" || item.period === selectedPeriod;
         const matchesType = selectedType === "all" || item.type === selectedType;
-        const searchable = [item.title, item.period, item.date, item.place, item.summary, item.detail].join(" ").toLocaleLowerCase("zh-CN");
+        const searchable = [item.title, item.period, item.date, item.place, item.summary, item.detail, item.source, item.source_url].join(" ").toLocaleLowerCase("zh-CN");
         return matchesPeriod && matchesType && searchable.includes(query);
       });
+      document.querySelector("#item-total").textContent = items.length;
       resultCount.textContent = `找到 ${filtered.length} 条`;
       results.replaceChildren();
       if (!filtered.length) {
@@ -218,7 +270,8 @@
         top.className = "entry-top";
         const tag = document.createElement("span");
         tag.className = `tag${item.type === "event" ? " event" : ""}`;
-        tag.textContent = item.type === "person" ? "历史人物" : "重要事件";
+        tag.textContent = typeNames[item.type] ?? "历史条目";
+        if (item.type !== "person" && item.type !== "event") tag.classList.add("event");
         const date = document.createElement("span");
         date.className = "date";
         date.textContent = item.date;
@@ -243,12 +296,41 @@
     }
 
     function showDetail(item) {
-      document.querySelector("#dialog-tag").textContent = `${item.period} · ${item.type === "person" ? "历史人物" : "重要事件"}`;
+      document.querySelector("#dialog-tag").textContent = `${item.period} · ${typeNames[item.type] ?? "历史条目"}`;
       document.querySelector("#dialog-title").textContent = item.title;
       document.querySelector("#dialog-date").textContent = `${item.date}  ·  ${item.place}`;
       document.querySelector("#dialog-description").textContent = item.detail;
-      document.querySelector("#dialog-note").textContent = item.note;
+      const source = item.source ? `资料来源：${item.source}` : "";
+      const sourceUrl = item.source_url ? ` · ${item.source_url}` : "";
+      document.querySelector("#dialog-note").textContent = [item.note, source + sourceUrl].filter(Boolean).join("  ");
       dialog.showModal();
+    }
+
+    function sortYear(item) {
+      const bc = item.date.match(/公元前\s*(\d+)/);
+      if (bc) return -Number(bc[1]);
+      const match = item.date.match(/\d{3,4}/);
+      return match ? Number(match[0]) : 999999;
+    }
+
+    async function loadCloudItems() {
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        status.textContent = "云端资料库尚未配置；显示内置示例资料。";
+        return;
+      }
+      try {
+        const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+        const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data, error } = await client.from("history_entries").select("*").order("year").order("title").limit(1000);
+        if (error) throw error;
+        items = [...localItems.filter(item => !data.some(entry => entry.title === item.title)), ...data];
+        status.textContent = `云端资料已同步 · 共 ${items.length} 条`;
+        status.style.color = "#174c3c";
+        render();
+      } catch (error) {
+        status.textContent = `云端资料暂不可用：${error.message}（当前显示内置资料）`;
+        status.style.color = "#a33d31";
+      }
     }
 
     document.querySelector("#dialog-close").addEventListener("click", () => dialog.close());
@@ -256,6 +338,7 @@
       if (event.target === dialog) dialog.close();
     });
     render();
+    loadCloudItems();
   </script>
 </body>
 </html>

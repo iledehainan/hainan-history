@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f3ed">
+  <title>琼史 · 资料管理后台</title>
+  <style>
+    :root { color-scheme: light; --ink:#202e2b; --muted:#6e7973; --paper:#f6f3ed; --card:#fffefa; --green:#174c3c; --line:#e7e4dc; font-family:"Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    .page { max-width:1040px; padding:24px 20px 60px; margin:auto; }
+    header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
+    a { color:var(--green); }
+    h1 { margin:0; font-size:25px; }
+    h2 { margin:0 0 17px; font-size:19px; }
+    .muted { color:var(--muted); font-size:13px; line-height:1.7; }
+    .panel { padding:22px; border:1px solid var(--line); border-radius:12px; background:var(--card); }
+    #notice { min-height:22px; margin:0 0 14px; color:var(--green); font-size:13px; }
+    #notice.error { color:#a33d31; }
+    .login { max-width:440px; margin:55px auto; }
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    label { display:grid; gap:6px; color:#4d5a53; font-size:12px; }
+    input,select,textarea { width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:7px; color:var(--ink); background:white; }
+    textarea { min-height:100px; resize:vertical; }
+    .wide { grid-column:1 / -1; }
+    .actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:15px; }
+    .button { padding:9px 13px; border:1px solid var(--line); border-radius:7px; color:var(--ink); background:white; }
+    .button.primary { border-color:var(--green); color:white; background:var(--green); }
+    .button.danger { color:#a33d31; }
+    .toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin:22px 0 12px; }
+    .entry { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:13px 0; border-top:1px solid var(--line); }
+    .entry-title { font-weight:700; }
+    .entry-meta { margin-top:4px; color:var(--muted); font-size:12px; }
+    .entry-actions { display:flex; gap:7px; flex-shrink:0; }
+    .entry-actions button { padding:6px 9px; border:1px solid var(--line); border-radius:6px; background:white; }
+    .import-box { margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
+    code { padding:2px 5px; border-radius:4px; background:#f0eee8; }
+    [hidden] { display:none !important; }
+    @media(max-width:600px) { .page { padding:18px 14px 40px; } .fields { grid-template-columns:1fr; } .wide { grid-column:auto; } .panel { padding:17px; } .entry { align-items:start; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header><h1>琼史 · 资料管理后台</h1><a href="./">返回历史速查 →</a></header>
+    <p id="notice" role="status" aria-live="polite"></p>
+    <section id="login-panel" class="panel login">
+      <h2>管理员登录</h2>
+      <p class="muted">后台仅允许已在 Supabase 中授权的管理员账号访问。</p>
+      <form id="login-form" class="fields">
+        <label class="wide">管理员邮箱<input name="email" type="email" autocomplete="username" required></label>
+        <label class="wide">密码<input name="password" type="password" autocomplete="current-password" required></label>
+        <button class="button primary wide" type="submit">登录</button>
+      </form>
+    </section>
+    <section id="workspace" hidden>
+      <div class="panel">
+        <h2 id="form-heading">添加历史资料</h2>
+        <form id="entry-form">
+          <input name="id" type="hidden">
+          <div class="fields">
+            <label>标题<input name="title" maxlength="160" required></label>
+            <label>历史时期<select name="period" required>
+              <option>先秦至汉</option><option>魏晋至宋元</option><option>明清时期</option><option>近现代</option><option>当代</option>
+            </select></label>
+            <label>条目类别<select name="type" required>
+              <option value="event">重要事件</option><option value="person">历史人物</option><option value="trade">航线与贸易</option><option value="place">港口与遗址</option><option value="artifact">文献与器物</option>
+            </select></label>
+            <label>排序年份（公元前请填负数）<input name="year" type="number" step="1" required placeholder="例如：-110、1097、2025"></label>
+            <label>年代显示<input name="date" maxlength="80" required placeholder="例如：公元前110年、宋代"></label>
+            <label>地点<input name="place" maxlength="120" placeholder="例如：琼州海峡、儋州"></label>
+            <label class="wide">摘要<input name="summary" maxlength="400" required></label>
+            <label class="wide">详细说明<textarea name="detail" maxlength="5000" required></textarea></label>
+            <label>资料来源<input name="source" maxlength="250" placeholder="书名、档案或机构"></label>
+            <label>来源链接<input name="source_url" type="url" maxlength="1000" placeholder="https://..."></label>
+          </div>
+          <div class="actions">
+            <button class="button primary" type="submit">保存资料</button>
+            <button class="button" id="cancel-edit" type="button" hidden>取消编辑</button>
+          </div>
+        </form>
+        <div class="import-box">
+          <h2>批量导入 CSV</h2>
+          <p class="muted">CSV 表头必须包含 <code>year,period,type,date,title,place,summary,detail</code>；可选列：<code>source,source_url</code>。条目类别可用 person、event、trade、place、artifact。建议先导入少量样例并检查显示效果。<a href="./history-import-template.csv" download>下载含南海贸易示例的 CSV 模板</a></p>
+          <label>选择 UTF-8 CSV 文件<input id="csv-file" type="file" accept=".csv,text/csv"></label>
+          <div class="actions"><button class="button" id="import-csv" type="button">导入所选文件</button></div>
+        </div>
+      </div>
+      <p class="muted">“网站约”包含17条内置资料；如把同名内置资料再次导入，主页会合并显示，但云端数量仍会单独计数。</p>
+      <div class="toolbar">
+        <h2 style="margin:0">云端资料：<span id="entry-count">0</span> 条</h2>
+        <button class="button" id="sign-out" type="button">退出登录</button>
+      </div>
+      <div id="entry-list" class="panel"></div>
+    </section>
+  </main>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
+
+    const notice = document.querySelector("#notice");
+    const loginPanel = document.querySelector("#login-panel");
+    const workspace = document.querySelector("#workspace");
+    const form = document.querySelector("#entry-form");
+    const list = document.querySelector("#entry-list");
+    let client;
+
+    function message(text, error = false) {
+      notice.textContent = text;
+      notice.classList.toggle("error", error);
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      message("请先在 supabase-config.js 中填写 Supabase 项目 URL 和 anon/publishable key。", true);
+      document.querySelector("#login-form button").disabled = true;
+    } else {
+      client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      await restoreSession();
+    }
+
+    async function restoreSession() {
+      const { data: { session }, error } = await client.auth.getSession();
+      if (error) return message(`无法检查登录状态：${error.message}`, true);
+      if (session) await verifyAdmin();
+    }
+
+    async function verifyAdmin() {
+      const { data: { user }, error: userError } = await client.auth.getUser();
+      if (userError || !user) {
+        await client.auth.signOut();
+        return message("登录状态无效，请重新登录。", true);
+      }
+      const { data, error } = await client.from("history_admins").select("user_id").eq("user_id", user.id).maybeSingle();
+      if (error || !data) {
+        await client.auth.signOut();
+        return message("该账号尚未获得后台管理员权限。", true);
+      }
+      loginPanel.hidden = true;
+      workspace.hidden = false;
+      message(`已登录：${user.email}`);
+      await loadEntries();
+    }
+
+    document.querySelector("#login-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const values = new FormData(event.currentTarget);
+      const { error } = await client.auth.signInWithPassword({
+        email: values.get("email"),
+        password: values.get("password")
+      });
+      if (error) return message(`登录失败：${error.message}`, true);
+      await verifyAdmin();
+    });
+
+    document.querySelector("#sign-out").addEventListener("click", async () => {
+      const { error } = await client.auth.signOut();
+      if (error) return message(`退出失败：${error.message}`, true);
+      workspace.hidden = true;
+      loginPanel.hidden = false;
+      message("已退出登录。");
+    });
+
+    async function loadEntries() {
+      const { data, error, count } = await client.from("history_entries")
+        .select("*", { count: "exact" }).order("year").order("title").limit(1000);
+      if (error) return message(`读取资料失败：${error.message}`, true);
+      const total = 17 + data.length;
+      const missing = Math.max(0, 500 - total);
+      document.querySelector("#entry-count").textContent = `${count ?? data.length} · 网站约 ${total} 条，距离500条还差 ${missing} 条`;
+      list.replaceChildren();
+      if (!data.length) {
+        list.textContent = "暂时还没有后台资料。可以手动添加，或导入 CSV。";
+        return;
+      }
+      for (const entry of data) {
+        const row = document.createElement("div");
+        row.className = "entry";
+        const text = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "entry-title";
+        title.textContent = entry.title;
+        const meta = document.createElement("div");
+        meta.className = "entry-meta";
+        meta.textContent = `${entry.date} · ${entry.period} · ${typeLabel(entry.type)}${entry.source ? ` · 来源：${entry.source}` : ""}`;
+        text.append(title, meta);
+        const actions = document.createElement("div");
+        actions.className = "entry-actions";
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.textContent = "编辑";
+        edit.addEventListener("click", () => fillForm(entry));
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "删除";
+        remove.addEventListener("click", () => deleteEntry(entry));
+        actions.append(edit, remove);
+        row.append(text, actions);
+        list.append(row);
+      }
+    }
+
+    function typeLabel(type) {
+      return ({ event: "事件", person: "人物", trade: "航线与贸易", place: "港口与遗址", artifact: "文献与器物" })[type] ?? type;
+    }
+
+    function fillForm(entry) {
+      for (const field of form.elements) {
+        if (field.name && Object.hasOwn(entry, field.name)) field.value = entry[field.name] ?? "";
+      }
+      document.querySelector("#form-heading").textContent = "编辑历史资料";
+      document.querySelector("#cancel-edit").hidden = false;
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function resetForm() {
+      form.reset();
+      form.elements.id.value = "";
+      document.querySelector("#form-heading").textContent = "添加历史资料";
+      document.querySelector("#cancel-edit").hidden = true;
+    }
+
+    document.querySelector("#cancel-edit").addEventListener("click", resetForm);
+
+    function formRecord(values) {
+      return {
+        year: Number(values.year),
+        period: values.period,
+        type: values.type,
+        date: values.date.trim(),
+        title: values.title.trim(),
+        place: values.place.trim(),
+        summary: values.summary.trim(),
+        detail: values.detail.trim(),
+        source: values.source.trim(),
+        source_url: values.source_url.trim()
+      };
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const values = Object.fromEntries(new FormData(form));
+      const id = values.id;
+      const record = formRecord(values);
+      const result = id
+        ? await client.from("history_entries").update({ ...record, updated_at: new Date().toISOString() }).eq("id", id)
+        : await client.from("history_entries").insert(record);
+      if (result.error) return message(`保存失败：${result.error.message}`, true);
+      resetForm();
+      message("资料已保存。");
+      await loadEntries();
+    });
+
+    async function deleteEntry(entry) {
+      if (!confirm(`确定删除“${entry.title}”吗？此操作不可撤销。`)) return;
+      const { error } = await client.from("history_entries").delete().eq("id", entry.id);
+      if (error) return message(`删除失败：${error.message}`, true);
+      message("资料已删除。");
+      await loadEntries();
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [], cell = "", quoted = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (quoted && char === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (char === '"') quoted = !quoted;
+        else if (char === "," && !quoted) { row.push(cell); cell = ""; }
+        else if ((char === "\n" || char === "\r") && !quoted) {
+          if (char === "\r" && text[i + 1] === "\n") i++;
+          row.push(cell);
+          if (row.some(value => value.trim())) rows.push(row);
+          row = [];
+          cell = "";
+        } else cell += char;
+      }
+      row.push(cell);
+      if (row.some(value => value.trim())) rows.push(row);
+      if (quoted) throw new Error("CSV 引号未闭合。");
+      if (!rows.length) throw new Error("CSV 文件没有数据。");
+      const headers = rows.shift().map(value => value.trim().replace(/^\uFEFF/, ""));
+      const required = ["year", "period", "type", "date", "title", "place", "summary", "detail"];
+      const missing = required.filter(key => !headers.includes(key));
+      if (missing.length) throw new Error(`CSV 缺少必需列：${missing.join(", ")}`);
+      return rows.map((values, index) => {
+        const record = Object.fromEntries(headers.map((header, column) => [header, values[column] ?? ""]));
+        record.year = Number(record.year);
+        if (!Number.isInteger(record.year) || !record.title || !record.summary || !record.detail) {
+          throw new Error(`第 ${index + 2} 行缺少标题、摘要、详情或有效年份。`);
+        }
+        if (!["先秦至汉", "魏晋至宋元", "明清时期", "近现代", "当代"].includes(record.period)) {
+          throw new Error(`第 ${index + 2} 行的历史时期无效：${record.period}`);
+        }
+        if (!["person", "event", "trade", "place", "artifact"].includes(record.type)) {
+          throw new Error(`第 ${index + 2} 行的条目类别无效：${record.type}`);
+        }
+        return {
+          year: record.year, period: record.period, type: record.type, date: record.date,
+          title: record.title, place: record.place, summary: record.summary, detail: record.detail,
+          source: record.source ?? "", source_url: record.source_url ?? ""
+        };
+      });
+    }
+
+    document.querySelector("#import-csv").addEventListener("click", async () => {
+      const file = document.querySelector("#csv-file").files[0];
+      if (!file) return message("请先选择 CSV 文件。", true);
+      try {
+        const records = parseCsv(await file.text());
+        for (let offset = 0; offset < records.length; offset += 100) {
+          const { error } = await client.from("history_entries").insert(records.slice(offset, offset + 100));
+          if (error) throw new Error(`第 ${offset + 1}—${Math.min(offset + 100, records.length)} 条导入失败：${error.message}`);
+        }
+        message(`成功导入 ${records.length} 条资料。`);
+        document.querySelector("#csv-file").value = "";
+        await loadEntries();
+      } catch (error) {
+        message(`CSV 导入失败：${error.message}`, true);
+      }
+    });
+  </script>
+</body>
+</html>
