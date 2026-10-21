@@ -36,6 +36,8 @@
     .entry-meta { margin-top:4px; color:var(--muted); font-size:12px; }
     .entry-actions { display:flex; gap:7px; flex-shrink:0; }
     .entry-actions button { padding:6px 9px; border:1px solid var(--line); border-radius:6px; background:white; }
+    .feedback-row { padding:14px 0; border-top:1px solid var(--line); }
+    .feedback-content { margin:7px 0; white-space:pre-wrap; }
     .import-box { margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
     code { padding:2px 5px; border-radius:4px; background:#f0eee8; }
     [hidden] { display:none !important; }
@@ -88,12 +90,14 @@
           <div class="actions"><button class="button" id="import-csv" type="button">导入所选文件</button></div>
         </div>
       </div>
-      <p class="muted">“网站约”包含27条内置资料；如把同名内置资料再次导入，主页会合并显示，但云端数量仍会单独计数。</p>
+      <p class="muted">“网站约”包含65条内置资料；如把同名内置资料再次导入，主页会合并显示，但云端数量仍会单独计数。</p>
       <div class="toolbar">
         <h2 style="margin:0">云端资料：<span id="entry-count">0</span> 条</h2>
         <button class="button" id="sign-out" type="button">退出登录</button>
       </div>
       <div id="entry-list" class="panel"></div>
+      <div class="toolbar"><h2 style="margin:0">待审核评价</h2></div>
+      <div id="feedback-list" class="panel"></div>
     </section>
   </main>
   <script type="module">
@@ -141,6 +145,7 @@
       workspace.hidden = false;
       message(`已登录：${user.email}`);
       await loadEntries();
+      await loadPendingReviews();
     }
 
     document.querySelector("#login-form").addEventListener("submit", async event => {
@@ -166,7 +171,7 @@
       const { data, error, count } = await client.from("history_entries")
         .select("*", { count: "exact" }).order("year").order("title").limit(1000);
       if (error) return message(`读取资料失败：${error.message}`, true);
-      const total = 27 + data.length;
+      const total = 65 + data.length;
       const missing = Math.max(0, 500 - total);
       document.querySelector("#entry-count").textContent = `${count ?? data.length} · 网站约 ${total} 条，距离500条还差 ${missing} 条`;
       list.replaceChildren();
@@ -198,6 +203,63 @@
         actions.append(edit, remove);
         row.append(text, actions);
         list.append(row);
+      }
+    }
+
+    async function loadPendingReviews() {
+      const feedbackList = document.querySelector("#feedback-list");
+      const { data, error } = await client.from("history_feedback")
+        .select("id, entry_title, nickname, rating, content, created_at")
+        .eq("kind", "review")
+        .eq("approved", false)
+        .order("created_at", { ascending: true })
+        .limit(200);
+      if (error) {
+        feedbackList.textContent = `无法读取待审核评价：${error.message}。请先在 Supabase SQL Editor 执行 supabase-feedback.sql。`;
+        return;
+      }
+      feedbackList.replaceChildren();
+      if (!data.length) {
+        feedbackList.textContent = "目前没有待审核评价。";
+        return;
+      }
+      for (const review of data) {
+        const row = document.createElement("article");
+        row.className = "feedback-row";
+        const title = document.createElement("strong");
+        title.textContent = review.entry_title;
+        const meta = document.createElement("div");
+        meta.className = "entry-meta";
+        meta.textContent = `${review.nickname || "访客"} · ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)} · ${new Date(review.created_at).toLocaleString()}`;
+        const content = document.createElement("p");
+        content.className = "feedback-content";
+        content.textContent = review.content;
+        const actions = document.createElement("div");
+        actions.className = "entry-actions";
+        const approve = document.createElement("button");
+        approve.type = "button";
+        approve.textContent = "审核通过";
+        approve.addEventListener("click", async () => {
+          const { error: updateError } = await client.from("history_feedback")
+            .update({ approved: true }).eq("id", review.id);
+          if (updateError) return message(`审核失败：${updateError.message}`, true);
+          message("评价已公开。");
+          await loadPendingReviews();
+        });
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "button danger";
+        remove.textContent = "删除";
+        remove.addEventListener("click", async () => {
+          if (!confirm(`确定删除“${review.entry_title}”的这条评价吗？`)) return;
+          const { error: deleteError } = await client.from("history_feedback").delete().eq("id", review.id);
+          if (deleteError) return message(`删除评价失败：${deleteError.message}`, true);
+          message("评价已删除。");
+          await loadPendingReviews();
+        });
+        actions.append(approve, remove);
+        row.append(title, meta, content, actions);
+        feedbackList.append(row);
       }
     }
 

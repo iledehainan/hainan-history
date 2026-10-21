@@ -77,6 +77,19 @@
     .dialog-inner p { color: var(--muted); font-size: 14px; line-height: 1.9; }
     .dialog-close { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); background: white; font-size: 18px; }
     .source-note { margin-top: 23px; padding-top: 14px; border-top: 1px solid var(--line); color: #848d86; font-size: 11px; line-height: 1.7; }
+    .feedback { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .feedback-summary { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .feedback-button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--green); background: white; font-size: 13px; font-weight: 650; }
+    .feedback-button:disabled { cursor: default; opacity: .7; }
+    .feedback-status,.feedback-empty { color: var(--muted); font-size: 12px; line-height: 1.7; }
+    .feedback h3 { margin: 18px 0 10px; font-size: 15px; }
+    .review { padding: 10px 0; border-top: 1px solid var(--line); }
+    .review-meta { color: var(--muted); font-size: 11px; }
+    .review p { margin: 5px 0 0; white-space: pre-wrap; }
+    .review-form { display: grid; gap: 9px; margin-top: 14px; }
+    .review-form label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
+    .review-form input,.review-form select,.review-form textarea { width: 100%; padding: 9px; border: 1px solid var(--line); border-radius: 7px; font: inherit; }
+    .review-form textarea { min-height: 78px; resize: vertical; }
     @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar { margin-bottom: 40px; } }
     @media (max-width: 540px) {
       .page { padding: 20px 17px 44px; }
@@ -105,26 +118,27 @@
     </header>
 
     <section class="hero" aria-labelledby="page-title">
-      <div class="eyebrow">Hainan · People &amp; Events</div>
-      <h1 id="page-title">读懂海南，<br>从历史开始。</h1>
-      <p class="intro">从珠崖郡到自由贸易港，按历史时期快速查找海南的重要人物与大事件。</p>
+      <div class="eyebrow">Hainan · History, Places &amp; Travel</div>
+      <h1 id="page-title">查询海南，<br>从这里开始。</h1>
+      <p class="intro">按关键词查找海南历史、市县乡村、名胜景点、港口机场、轮渡航线与产业企业。</p>
       <label class="search-wrap">
         <span class="search-icon" aria-hidden="true">⌕</span>
-        <input id="search" type="search" placeholder="试试搜索：海瑞、苏轼、琼崖纵队……" autocomplete="off" aria-label="搜索人物、事件或关键词">
+        <input id="search" type="search" placeholder="试试搜索：海口、南山、轮渡、机场、椰树工厂……" autocomplete="off" aria-label="搜索历史、地点、景点、交通或企业">
         <span class="shortcut">实时搜索</span>
       </label>
       <div class="stats" aria-label="内容统计">
-        <span><strong id="item-total">0</strong>条历史条目</span>
+        <span><strong id="item-total">0</strong>条查询资料</span>
         <span><strong id="era-total">0</strong>个时期</span>
       </div>
     </section>
 
     <section aria-labelledby="timeline-heading">
       <div class="section-head">
-        <h2 id="timeline-heading">沿着时间，探索琼州</h2>
+        <h2 id="timeline-heading">查询海南历史、地理与出行</h2>
         <span class="result-count" id="result-count" aria-live="polite"></span>
       </div>
       <nav class="filters" id="era-filters" aria-label="按历史时期筛选"></nav>
+      <nav class="filters" id="topic-filters" aria-label="按资料主题筛选"></nav>
       <div class="toolbar">
         <div class="type-tabs" aria-label="按条目类型筛选">
           <button class="type-tab" data-type="all" aria-pressed="true">全部条目</button>
@@ -135,7 +149,7 @@
       </div>
       <div class="grid" id="results"></div>
     </section>
-    <footer>本页为入门级历史索引，年代与人物简介作概览使用。涉及复杂历史背景或不同史料说法时，建议结合地方志、正史及专题研究进一步核对。</footer>
+    <footer>本页为入门级历史索引，年代与人物简介作概览使用。涉及复杂历史背景或不同史料说法时，建议结合地方志、正史及专题研究进一步核对。启用统计后，访问量与国家汇总由 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare Web Analytics</a> 处理；点赞去重使用浏览器本地随机标识，评价经管理员审核后公开。</footer>
   </main>
 
   <dialog id="detail-dialog" aria-labelledby="dialog-title">
@@ -150,13 +164,38 @@
       </div>
       <p id="dialog-description"></p>
       <div class="source-note" id="dialog-note"></div>
+      <section class="feedback" aria-label="点赞与评价">
+        <div class="feedback-summary">
+          <button class="feedback-button" id="like-button" type="button">👍 点赞 <span id="like-count">0</span></button>
+          <span class="feedback-status" id="feedback-summary"></span>
+        </div>
+        <p class="feedback-status" id="feedback-status" role="status" aria-live="polite"></p>
+        <h3>评价与留言</h3>
+        <div id="review-list"></div>
+        <form class="review-form" id="review-form">
+          <label>评分
+            <select name="rating" required>
+              <option value="5">★★★★★ 很好</option>
+              <option value="4">★★★★☆ 不错</option>
+              <option value="3">★★★☆☆ 一般</option>
+              <option value="2">★★☆☆☆ 不太好</option>
+              <option value="1">★☆☆☆☆ 不满意</option>
+            </select>
+          </label>
+          <label>昵称（可选）<input name="nickname" maxlength="30" autocomplete="nickname"></label>
+          <label>评价内容<textarea name="content" maxlength="1000" required></textarea></label>
+          <button class="feedback-button" type="submit">提交评价（审核后公开）</button>
+        </form>
+      </section>
     </div>
   </dialog>
 
   <script type="module">
     import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
+    import { CLOUDFLARE_WEB_ANALYTICS_TOKEN } from "./analytics-config.js";
     import { maritimeEntries } from "./maritime-history.js";
     import { architectureEntries } from "./architecture-history.js";
+    import { referenceEntries } from "./reference-entries.js";
     const periods = ["全部时期", "先秦至汉", "魏晋至宋元", "明清时期", "近现代", "当代"];
     let items = [
       { id: "han-commandery", period: "先秦至汉", type: "event", date: "公元前110年", title: "汉武帝设珠崖、儋耳郡", place: "海南岛", summary: "汉武帝元鼎六年，中央王朝在海南岛设置珠崖郡、儋耳郡，标志着对海南的郡县治理开始。", detail: "西汉在海南岛设置珠崖、儋耳两郡，郡县治所与辖境历来有史料考订。汉昭帝始元五年（公元前82年），珠崖郡因地方局势等原因被撤并。此后历代对海南的建置与实际治理多有变化。", note: "公元前110年为通行纪年，具体建置沿革可参照《汉书·地理志》及海南地方志。" },
@@ -187,7 +226,7 @@
       "free-trade-port": 2018
     };
     items.forEach(item => { item.year ??= knownYears[item.id] ?? 999999; });
-    items = [...items, ...maritimeEntries, ...architectureEntries];
+    items = [...items, ...maritimeEntries, ...architectureEntries, ...referenceEntries];
 
     const results = document.querySelector("#results");
     const search = document.querySelector("#search");
@@ -196,7 +235,11 @@
     const dialog = document.querySelector("#detail-dialog");
     let selectedPeriod = "全部时期";
     let selectedType = "all";
+    let selectedCategory = "all";
     const localItems = items.slice();
+    let supabaseClient;
+    let activeFeedbackEntry;
+    const visitorKeyName = "qiong-history-feedback-visitor";
     const status = document.createElement("span");
     status.className = "result-count";
     status.style.display = "block";
@@ -207,8 +250,18 @@
       person: "历史人物",
       event: "重要事件",
       trade: "航线与贸易",
-      place: "港口与遗址",
+      place: "地点与设施",
       artifact: "文献与器物"
+    };
+    const categoryNames = {
+      administration: "市县乡村",
+      villages: "村落",
+      heritage: "名胜古迹",
+      tourism: "旅游景点",
+      ports: "港口码头",
+      aviation: "机场航班",
+      ferry: "轮渡铁路",
+      industry: "工厂企业"
     };
     const tabs = document.querySelector(".type-tabs");
     for (const [type, name] of Object.entries(typeNames).slice(3)) {
@@ -240,6 +293,21 @@
       eraFilters.append(button);
     }
 
+    const topicFilters = document.querySelector("#topic-filters");
+    const categoryOrder = Object.keys(categoryNames).filter(category => items.some(item => item.category === category));
+    for (const category of ["all", ...categoryOrder]) {
+      const button = document.createElement("button");
+      button.className = "filter";
+      button.textContent = category === "all" ? "全部主题" : categoryNames[category];
+      button.setAttribute("aria-pressed", String(category === selectedCategory));
+      button.addEventListener("click", () => {
+        selectedCategory = category;
+        topicFilters.querySelectorAll(".filter").forEach(filter => filter.setAttribute("aria-pressed", String(filter === button)));
+        render();
+      });
+      topicFilters.append(button);
+    }
+
     document.querySelectorAll(".type-tab").forEach(button => {
       button.addEventListener("click", () => {
         selectedType = button.dataset.type;
@@ -254,8 +322,9 @@
       const filtered = items.slice().sort((a, b) => (a.year ?? sortYear(a)) - (b.year ?? sortYear(b))).filter(item => {
         const matchesPeriod = selectedPeriod === "全部时期" || item.period === selectedPeriod;
         const matchesType = selectedType === "all" || item.type === selectedType;
-        const searchable = [item.title, item.period, item.date, item.place, item.summary, item.detail, item.source, item.source_url].join(" ").toLocaleLowerCase("zh-CN");
-        return matchesPeriod && matchesType && searchable.includes(query);
+        const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+        const searchable = [item.title, item.period, item.date, item.place, item.summary, item.detail, item.source, item.source_url, categoryNames[item.category]].join(" ").toLocaleLowerCase("zh-CN");
+        return matchesPeriod && matchesType && matchesCategory && searchable.includes(query);
       });
       document.querySelector("#item-total").textContent = items.length;
       resultCount.textContent = `找到 ${filtered.length} 条`;
@@ -274,7 +343,7 @@
         top.className = "entry-top";
         const tag = document.createElement("span");
         tag.className = `tag${item.type === "event" ? " event" : ""}`;
-        tag.textContent = typeNames[item.type] ?? "历史条目";
+        tag.textContent = categoryNames[item.category] ?? typeNames[item.type] ?? "历史条目";
         if (item.type !== "person" && item.type !== "event") tag.classList.add("event");
         const date = document.createElement("span");
         date.className = "date";
@@ -300,15 +369,136 @@
     }
 
     function showDetail(item) {
-      document.querySelector("#dialog-tag").textContent = `${item.period} · ${typeNames[item.type] ?? "历史条目"}`;
+      activeFeedbackEntry = item;
+      document.querySelector("#dialog-tag").textContent = `${item.period} · ${categoryNames[item.category] ?? typeNames[item.type] ?? "历史条目"}`;
       document.querySelector("#dialog-title").textContent = item.title;
       document.querySelector("#dialog-date").textContent = `${item.date}  ·  ${item.place}`;
       document.querySelector("#dialog-description").textContent = item.detail;
       const source = item.source ? `资料来源：${item.source}` : "";
       const sourceUrl = item.source_url ? ` · ${item.source_url}` : "";
       document.querySelector("#dialog-note").textContent = [item.note, source + sourceUrl].filter(Boolean).join("  ");
+      loadFeedback(item);
       dialog.showModal();
     }
+
+    function getFeedbackVisitorKey() {
+      let key = localStorage.getItem(visitorKeyName);
+      if (!key) {
+        key = crypto.randomUUID();
+        localStorage.setItem(visitorKeyName, key);
+      }
+      return key;
+    }
+
+    async function loadFeedback(item) {
+      const feedbackStatus = document.querySelector("#feedback-status");
+      const list = document.querySelector("#review-list");
+      const likeButton = document.querySelector("#like-button");
+      const reviewForm = document.querySelector("#review-form");
+      const setFormDisabled = disabled => reviewForm.querySelectorAll("input, select, textarea, button").forEach(control => { control.disabled = disabled; });
+      document.querySelector("#like-count").textContent = "…";
+      document.querySelector("#feedback-summary").textContent = "";
+      list.replaceChildren();
+      likeButton.disabled = true;
+      setFormDisabled(true);
+      if (!supabaseClient) {
+        feedbackStatus.textContent = "点赞与评价服务尚未配置数据库。";
+        return;
+      }
+      feedbackStatus.textContent = "正在读取评价…";
+      const [summaryResult, reviewsResult] = await Promise.all([
+        supabaseClient.rpc("get_history_feedback_summary", { p_entry_title: item.title }),
+        supabaseClient.rpc("get_history_feedback_reviews", { p_entry_title: item.title })
+      ]);
+      if (activeFeedbackEntry !== item) return;
+      if (summaryResult.error || reviewsResult.error) {
+        const error = summaryResult.error ?? reviewsResult.error;
+        feedbackStatus.textContent = error.code === "PGRST202"
+          ? "评价功能尚未启用；管理员需先在 Supabase 执行 supabase-feedback.sql。"
+          : `暂时无法读取评价：${error.message}`;
+        return;
+      }
+      const summary = summaryResult.data[0];
+      const reviews = reviewsResult.data;
+      const localLikes = JSON.parse(localStorage.getItem("qiong-history-feedback-likes") || "[]");
+      const alreadyLiked = localLikes.includes(item.title);
+      document.querySelector("#like-count").textContent = String(summary.like_count);
+      document.querySelector("#feedback-summary").textContent = summary.review_count
+        ? `${summary.review_count} 条已审核评价 · 平均 ${Number(summary.average_rating).toFixed(1)} / 5`
+        : "暂无已审核评价";
+      likeButton.disabled = alreadyLiked;
+      setFormDisabled(false);
+      likeButton.textContent = alreadyLiked ? `👍 已点赞 ${summary.like_count}` : `👍 点赞 ${summary.like_count}`;
+      feedbackStatus.textContent = "";
+      if (!reviews.length) {
+        const empty = document.createElement("p");
+        empty.className = "feedback-empty";
+        empty.textContent = "还没有已审核的评价，欢迎分享你的看法。";
+        list.append(empty);
+      }
+      for (const review of reviews) {
+        const article = document.createElement("article");
+        article.className = "review";
+        const meta = document.createElement("div");
+        meta.className = "review-meta";
+        meta.textContent = `${review.nickname || "访客"} · ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}`;
+        const content = document.createElement("p");
+        content.textContent = review.content;
+        article.append(meta, content);
+        list.append(article);
+      }
+    }
+
+    document.querySelector("#like-button").addEventListener("click", async () => {
+      if (!activeFeedbackEntry || !supabaseClient) return;
+      const entry = activeFeedbackEntry;
+      const feedbackStatus = document.querySelector("#feedback-status");
+      try {
+        const voterId = getFeedbackVisitorKey();
+        const { error } = await supabaseClient.from("history_feedback").insert({
+          entry_title: entry.title,
+          kind: "like",
+          voter_id: voterId
+        });
+        if (error) throw error;
+        const localLikes = JSON.parse(localStorage.getItem("qiong-history-feedback-likes") || "[]");
+        localStorage.setItem("qiong-history-feedback-likes", JSON.stringify([...new Set([...localLikes, entry.title])]));
+        if (activeFeedbackEntry === entry) await loadFeedback(entry);
+      } catch (error) {
+        if (activeFeedbackEntry === entry) {
+          feedbackStatus.textContent = error.code === "23505" ? "这个浏览器已经为该条目点过赞。" : `点赞失败：${error.message}`;
+        }
+      }
+    });
+
+    document.querySelector("#review-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!activeFeedbackEntry || !supabaseClient) return;
+      const entry = activeFeedbackEntry;
+      const form = event.currentTarget;
+      const values = Object.fromEntries(new FormData(form));
+      const feedbackStatus = document.querySelector("#feedback-status");
+      feedbackStatus.textContent = "正在提交评价…";
+      try {
+        const { error } = await supabaseClient.from("history_feedback").insert({
+          entry_title: entry.title,
+          kind: "review",
+          voter_id: getFeedbackVisitorKey(),
+          nickname: String(values.nickname).trim(),
+          rating: Number(values.rating),
+          content: String(values.content).trim()
+        });
+        if (error) throw error;
+        form.reset();
+        if (activeFeedbackEntry === entry) feedbackStatus.textContent = "评价已提交，管理员审核通过后会公开显示。";
+      } catch (error) {
+        if (activeFeedbackEntry === entry) {
+          feedbackStatus.textContent = error.code === "23505"
+            ? "这个浏览器已提交过该条目的评价。"
+            : `提交失败：${error.message}`;
+        }
+      }
+    });
 
     function sortYear(item) {
       const bc = item.date.match(/公元前\s*(\d+)/);
@@ -324,10 +514,17 @@
       }
       try {
         const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-        const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data, error } = await client.from("history_entries").select("*").order("year").order("title").limit(1000);
+        supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { data, error } = await supabaseClient.from("history_entries").select("*").order("year").order("title").limit(1000);
         if (error) throw error;
-        items = [...localItems.filter(item => !data.some(entry => entry.title === item.title)), ...data];
+        const localByTitle = new Map(localItems.map(item => [item.title, item]));
+        items = [
+          ...localItems.filter(item => !data.some(entry => entry.title === item.title)),
+          ...data.map(entry => {
+            const localItem = localByTitle.get(entry.title);
+            return { ...localItem, ...entry, category: entry.category ?? localItem?.category };
+          })
+        ];
         status.textContent = `云端资料已同步 · 共 ${items.length} 条`;
         status.style.color = "#174c3c";
         render();
@@ -341,6 +538,13 @@
     dialog.addEventListener("click", event => {
       if (event.target === dialog) dialog.close();
     });
+    if (CLOUDFLARE_WEB_ANALYTICS_TOKEN) {
+      const analytics = document.createElement("script");
+      analytics.defer = true;
+      analytics.src = "https://static.cloudflareinsights.com/beacon.min.js";
+      analytics.dataset.cfBeacon = JSON.stringify({ token: CLOUDFLARE_WEB_ANALYTICS_TOKEN });
+      document.head.append(analytics);
+    }
     render();
     loadCloudItems();
   </script>
