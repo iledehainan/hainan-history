@@ -2,6 +2,8 @@
 
 本网站托管在 GitHub Pages，是静态网页。Supabase 提供共享数据库和管理员登录；浏览器使用的 `anon` / `publishable` key 不是管理员密码，数据库安全由行级安全策略（RLS）保护。**不要把 `service_role` key 放进网站。**
 
+手机端 PWA 和 iPhone 主屏幕安装步骤请参阅 [`APP_INSTALL.md`](APP_INSTALL.md)。
+
 ## 首次配置
 
 1. 在 Supabase 创建项目。

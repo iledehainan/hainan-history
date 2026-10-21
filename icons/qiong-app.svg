@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#12b9a5"/>
+      <stop offset="1" stop-color="#087f78"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" x2="0" y1="0" y2="1">
+      <stop stop-color="#76dfc5"/>
+      <stop offset="1" stop-color="#138a91"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#sky)"/>
+  <circle cx="382" cy="135" r="63" fill="#ffd76c"/>
+  <path d="M0 325c72-26 130-20 205 0s142 20 307-12v199H0Z" fill="url(#sea)"/>
+  <path d="M0 364c94-23 161-8 242 10s174 11 270-9" fill="none" stroke="#c9fff0" stroke-linecap="round" stroke-width="10" opacity=".75"/>
+  <path d="M212 415c40-74 65-160 38-249" fill="none" stroke="#754d32" stroke-linecap="round" stroke-width="23"/>
+  <path d="M247 176c-58-62-91-67-142-53 48 8 77 25 112 71-66-35-97-35-139-18 57 2 88 17 127 49-60-15-94-8-126 18 58-10 96-1 139 18-50 5-78 23-99 50 48-21 90-27 134-29 6 47 1 88-13 126 41-54 58-133 43-226 29-51 62-74 114-91-52 3-90 17-128 51 31-54 68-77 119-96-58 9-103 28-144 72 20-62 49-95 97-129-60 29-106 65-133 132-1-57 16-99 49-146-49 48-76 99-69 180Z" fill="#155b4e"/>
+  <g fill="#20a77c">
+    <circle cx="239" cy="173" r="13"/>
+    <circle cx="259" cy="176" r="12"/>
+    <circle cx="248" cy="193" r="12"/>
+  </g>
+  <path d="M0 465c102-33 171-30 254-7 98 27 170 20 258-14v68H0Z" fill="#087f78"/>
+  <text x="256" y="470" fill="#fff8e8" font-family="Microsoft YaHei,sans-serif" font-size="48" font-weight="700" letter-spacing="8" text-anchor="middle">琼史</text>
+</svg>

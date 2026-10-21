@@ -2,65 +2,81 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f6f3ed">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#087f78">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="琼史">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="琼史随身查：海南历史、市县乡村、名胜古迹、景点交通与产业资料。">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/qiong-app.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/qiong-180.png">
   <title>琼史·海南历史速查</title>
   <style>
     :root {
       color-scheme: light;
-      --ink: #202e2b;
-      --muted: #6e7973;
-      --paper: #f6f3ed;
-      --card: #fffefa;
-      --green: #174c3c;
-      --green-light: #e3eee7;
-      --orange: #bd6841;
-      --line: #e7e4dc;
+      --ink: #183c3c;
+      --muted: #617b78;
+      --paper: #f1f8f4;
+      --card: #ffffff;
+      --green: #087f78;
+      --green-light: #ddf5ec;
+      --orange: #ef7754;
+      --line: #dcece5;
       font-family: "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--paper); color: var(--ink); }
+    body { margin: 0; background: radial-gradient(ellipse at 90% 8%, #d7f6ed 0, transparent 28rem), var(--paper); color: var(--ink); }
     button, input { font: inherit; }
     button { cursor: pointer; }
     .page { max-width: 1160px; padding: 28px 28px 64px; margin: 0 auto; }
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 54px; }
     .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: .04em; }
-    .brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px 12px 12px 3px; color: white; background: var(--green); font-family: Georgia, serif; font-size: 21px; }
+    .brand-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 15px 15px 15px 4px; color: #fff; background: linear-gradient(145deg,#08a69a,#087f78 55%,#ef7754); box-shadow: 0 6px 14px #087f7833; font-family: Georgia, serif; font-size: 22px; }
     .topbar-actions { display: flex; align-items: center; gap: 16px; }
     .top-note { color: var(--muted); font-size: 13px; }
     .admin-link { padding: 9px 14px; border: 1px solid var(--green); border-radius: 8px; color: white; background: var(--green); font-size: 13px; font-weight: 650; text-decoration: none; white-space: nowrap; }
     .admin-link:hover { background: #103b2e; }
     .admin-link:focus-visible { outline: 3px solid #bd6841; outline-offset: 3px; }
-    .hero { position: relative; overflow: hidden; padding: 0 0 36px; }
-    .hero::after { content: "琼"; position: absolute; z-index: -1; right: 4%; top: -105px; color: #ebe9df; font-family: serif; font-size: 340px; line-height: 1; }
-    .eyebrow { color: var(--orange); font-size: 12px; font-weight: 750; letter-spacing: .18em; text-transform: uppercase; }
+    .install-link { padding: 9px 13px; border: 1px solid #f0b55e; border-radius: 8px; color: #714423; background: #fff4d8; font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .hero { position: relative; overflow: hidden; min-height: 285px; margin-bottom: 25px; padding: 32px 34px 30px; border-radius: 26px; color: white; background: linear-gradient(118deg,#087f78 0%,#10a997 55%,#5bc6aa 100%); box-shadow: 0 20px 45px #087f7826; }
+    .hero::before { content: ""; position: absolute; width: 340px; height: 340px; right: -70px; top: -100px; border-radius: 50%; background: #ffd878; opacity: .95; }
+    .hero::after { content: "椰"; position: absolute; right: 4%; bottom: -66px; color: #fff6; font-family: serif; font-size: 230px; line-height: 1; transform: rotate(-9deg); }
+    .hero > * { position: relative; z-index: 1; }
+    .eyebrow { color: #ffe39c; font-size: 12px; font-weight: 750; letter-spacing: .18em; text-transform: uppercase; }
     h1 { margin: 13px 0 12px; font-family: Georgia, "Noto Serif CJK SC", serif; font-size: clamp(40px, 7vw, 68px); font-weight: 650; letter-spacing: .02em; }
-    .intro { max-width: 580px; margin: 0; color: var(--muted); font-size: 15px; line-height: 1.9; }
-    .search-wrap { display: flex; align-items: center; gap: 12px; max-width: 730px; margin-top: 27px; padding: 8px 9px 8px 17px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); box-shadow: 0 8px 24px #25382a0a; }
+    .intro { max-width: 580px; margin: 0; color: #ecfffa; font-size: 15px; line-height: 1.9; text-shadow: 0 1px 5px #07584e88; }
+    .search-wrap { display: flex; align-items: center; gap: 12px; max-width: 730px; margin-top: 22px; padding: 8px 9px 8px 17px; border: 1px solid #ffffffaa; border-radius: 14px; background: white; box-shadow: 0 8px 24px #123b301f; }
     .search-icon { color: var(--green); font-size: 21px; }
     .search-wrap input { flex: 1; min-width: 0; padding: 8px 0; border: 0; outline: 0; color: var(--ink); background: transparent; }
     .search-wrap input::placeholder { color: #9ba19b; }
     .shortcut { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-size: 11px; }
-    .stats { display: flex; gap: 27px; margin-top: 24px; color: var(--muted); font-size: 12px; }
-    .stats strong { margin-right: 5px; color: var(--green); font-size: 16px; }
+    .stats { display: flex; gap: 27px; margin-top: 19px; color: #ecfffa; font-size: 12px; }
+    .stats strong { margin-right: 5px; color: #ffe39c; font-size: 16px; }
+    .hero > .result-count { color: #effff9; }
     .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 13px 0 17px; }
     h2 { margin: 0; font-size: 20px; letter-spacing: .02em; }
     .result-count { color: var(--muted); font-size: 13px; }
     .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
-    .filter { padding: 8px 13px; border: 1px solid var(--line); border-radius: 999px; color: #59645e; background: transparent; font-size: 12px; transition: .15s ease; }
+    .filter { padding: 8px 13px; border: 1px solid #c9e6db; border-radius: 999px; color: #346765; background: #ffffffb8; font-size: 12px; transition: .15s ease; }
     .filter:hover { border-color: #a9b8ac; }
-    .filter[aria-pressed="true"] { border-color: var(--green); color: white; background: var(--green); }
+    .filter[aria-pressed="true"] { border-color: var(--green); color: white; background: linear-gradient(120deg,#08a69a,#087f78); box-shadow: 0 4px 12px #087f7825; }
     .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .type-tabs { display: flex; flex-wrap: wrap; gap: 12px 17px; }
     .type-tab { padding: 3px 0 6px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: none; font-size: 13px; }
     .type-tab[aria-pressed="true"] { border-color: var(--orange); color: var(--ink); font-weight: 700; }
     .sort-label { color: var(--muted); font-size: 12px; }
     .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    .entry { display: flex; flex-direction: column; min-height: 222px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); transition: transform .16s ease, box-shadow .16s ease; }
-    .entry:hover { transform: translateY(-3px); box-shadow: 0 12px 28px #24372b0d; }
+    .entry { display: flex; flex-direction: column; min-height: 222px; padding: 20px; border: 1px solid var(--line); border-top: 4px solid var(--card-accent, #18a999); border-radius: 16px; background: var(--card); box-shadow: 0 7px 22px #19463d0a; transition: transform .16s ease, box-shadow .16s ease; }
+    .entry:nth-child(5n + 2) { --card-accent: #f18a5c; }
+    .entry:nth-child(5n + 3) { --card-accent: #eab84e; }
+    .entry:nth-child(5n + 4) { --card-accent: #5d9fdd; }
+    .entry:nth-child(5n + 5) { --card-accent: #9b83c8; }
+    .entry:hover { transform: translateY(-3px); box-shadow: 0 12px 28px #24372b16; }
     .entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .tag { padding: 5px 8px; border-radius: 5px; color: var(--green); background: var(--green-light); font-size: 11px; }
-    .tag.event { color: #985536; background: #f6e9df; }
+    .tag { padding: 5px 9px; border-radius: 999px; color: #087f78; background: #ddf5ec; font-size: 11px; font-weight: 700; }
+    .tag.event { color: #a84d31; background: #fff0df; }
     .date { color: #808981; font-size: 11px; }
     .entry h3 { margin: 17px 0 8px; font-size: 17px; line-height: 1.45; }
     .entry p { display: -webkit-box; overflow: hidden; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
@@ -90,21 +106,49 @@
     .review-form label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
     .review-form input,.review-form select,.review-form textarea { width: 100%; padding: 9px; border: 1px solid var(--line); border-radius: 7px; font: inherit; }
     .review-form textarea { min-height: 78px; resize: vertical; }
+    .install-panel { margin: -11px 0 24px; padding: 17px 19px; border: 1px solid #f2d58d; border-radius: 16px; background: linear-gradient(120deg,#fff5d7,#fff 68%); box-shadow: 0 8px 20px #a6762410; }
+    .install-panel[hidden] { display: none; }
+    .install-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .install-panel h2 { color: #714423; font-size: 17px; }
+    .install-panel p { margin: 8px 0 0; color: #705e43; font-size: 13px; line-height: 1.8; }
+    .install-close { padding: 5px 9px; border: 0; border-radius: 8px; color: #795d31; background: #f8e8b6; }
+    .mobile-nav { display: none; }
     @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar { margin-bottom: 40px; } }
     @media (max-width: 540px) {
-      .page { padding: 20px 17px 44px; }
-      .topbar { margin-bottom: 38px; }
-      .topbar-actions { gap: 0; }
+      body { background: radial-gradient(ellipse at 100% 4%,#d6f4eb 0,transparent 17rem),var(--paper); }
+      .page { padding: max(15px,env(safe-area-inset-top)) 15px calc(90px + env(safe-area-inset-bottom)); }
+      .topbar { margin: 0 2px 17px; }
+      .topbar-actions { gap: 7px; }
       .top-note { display: none; }
-      .admin-link { padding: 8px 11px; font-size: 12px; }
-      .hero::after { right: -32px; top: -48px; font-size: 240px; }
-      .intro { max-width: 90%; font-size: 14px; }
+      .admin-link { padding: 8px 9px; font-size: 11px; }
+      .install-link { padding: 8px 9px; font-size: 11px; }
+      .hero { min-height: 290px; margin: 0 -3px 22px; padding: 24px 21px 22px; border-radius: 23px; }
+      .hero::before { width: 220px; height: 220px; right: -95px; top: -73px; }
+      .hero::after { right: -17px; bottom: -45px; font-size: 150px; }
+      h1 { margin: 14px 0 10px; font-size: clamp(37px,11vw,52px); }
+      .intro { max-width: 88%; font-size: 13px; line-height: 1.75; }
+      .search-wrap { margin-top: 17px; padding-left: 13px; }
+      .search-wrap input { font-size: 14px; }
       .shortcut { display: none; }
-      .stats { gap: 17px; }
-      .grid { grid-template-columns: 1fr; }
-      .entry { min-height: 195px; }
-      .toolbar { align-items: start; flex-direction: column; gap: 12px; }
+      .stats { gap: 17px; margin-top: 14px; }
+      .section-head { align-items: center; margin-top: 10px; }
+      h2 { font-size: 18px; }
+      .filters { gap: 7px; margin-bottom: 15px; }
+      .filter { padding: 8px 11px; font-size: 11px; }
+      .grid { grid-template-columns: 1fr; gap: 11px; }
+      .entry { min-height: 0; padding: 16px; border-radius: 15px; }
+      .entry h3 { margin-top: 12px; }
+      .toolbar { align-items: start; flex-direction: column; gap: 9px; margin-bottom: 12px; }
+      .type-tabs { gap: 10px 15px; }
+      .mobile-nav { position: fixed; z-index: 5; right: 0; bottom: 0; left: 0; display: flex; justify-content: space-around; padding: 9px 9px calc(9px + env(safe-area-inset-bottom)); border-top: 1px solid #d8ebe3; background: #ffffffed; backdrop-filter: blur(18px); }
+      .mobile-nav a { display: grid; justify-items: center; gap: 2px; min-width: 64px; padding: 4px 7px; border-radius: 11px; color: #54716b; font-size: 10px; text-decoration: none; }
+      .mobile-nav a span:first-child { font-size: 18px; line-height: 1.2; }
+      .mobile-nav a[aria-current="page"] { color: #087f78; background: #e1f5ee; font-weight: 750; }
+      .install-panel { margin: 0 0 18px; }
+      .dialog-inner { padding: 21px; }
     }
+    @media (display-mode: standalone) { .install-link { display: none; } }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
   </style>
 </head>
 <body>
@@ -113,9 +157,18 @@
       <div class="brand"><span class="brand-mark" aria-hidden="true">琼</span><span>琼史 · QIONG HISTORY</span></div>
       <div class="topbar-actions">
         <div class="top-note">一座海岛的历史速查手册</div>
+        <button class="install-link" id="install-app" type="button">安装到手机</button>
         <a class="admin-link" href="./admin.html">进入资料后台</a>
       </div>
     </header>
+
+    <aside class="install-panel" id="install-panel" hidden aria-live="polite">
+      <div class="install-panel-head">
+        <h2>把琼史带到手机桌面</h2>
+        <button class="install-close" id="install-close" type="button" aria-label="关闭安装说明">关闭</button>
+      </div>
+      <p id="install-instructions"></p>
+    </aside>
 
     <section class="hero" aria-labelledby="page-title">
       <div class="eyebrow">Hainan · History, Places &amp; Travel</div>
@@ -131,6 +184,12 @@
         <span><strong id="era-total">0</strong>个时期</span>
       </div>
     </section>
+    <nav class="mobile-nav" aria-label="快捷导航">
+      <a href="#page-title" aria-current="page"><span>🌴</span><span>首页</span></a>
+      <a href="#timeline-heading"><span>📜</span><span>查历史</span></a>
+      <a href="#topic-filters"><span>🗺️</span><span>看海南</span></a>
+      <a href="#search" id="mobile-search-link"><span>🔎</span><span>搜索</span></a>
+    </nav>
 
     <section aria-labelledby="timeline-heading">
       <div class="section-head">
@@ -546,6 +605,49 @@
       analytics.src = "https://static.cloudflareinsights.com/beacon.min.js";
       analytics.dataset.cfBeacon = JSON.stringify({ token: CLOUDFLARE_WEB_ANALYTICS_TOKEN });
       document.head.append(analytics);
+    }
+    const installButton = document.querySelector("#install-app");
+    const installPanel = document.querySelector("#install-panel");
+    const installInstructions = document.querySelector("#install-instructions");
+    let installPrompt;
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isInstalled = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    if (isInstalled) installButton.hidden = true;
+
+    window.addEventListener("beforeinstallprompt", event => {
+      event.preventDefault();
+      installPrompt = event;
+    });
+    window.addEventListener("appinstalled", () => {
+      installButton.hidden = true;
+      installPanel.hidden = true;
+      installPrompt = null;
+    });
+    installButton.addEventListener("click", async () => {
+      if (installPrompt) {
+        installPrompt.prompt();
+        await installPrompt.userChoice;
+        installPrompt = null;
+        return;
+      }
+      installPanel.hidden = false;
+      installInstructions.textContent = isIos
+        ? "请在 iPhone 的 Safari 中打开本网站，点底部“分享”图标（方框上箭头），选择“添加到主屏幕”，再点“添加”。安装后可从桌面图标直接打开；首次联网加载后，内置资料支持离线浏览。"
+        : "请使用支持 PWA 的浏览器打开本网站，在浏览器菜单选择“安装应用”或“添加到主屏幕”。安装后可从桌面图标直接打开；首次联网加载后，内置资料支持离线浏览。";
+      installPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    document.querySelector("#install-close").addEventListener("click", () => {
+      installPanel.hidden = true;
+    });
+    document.querySelector("#mobile-search-link").addEventListener("click", () => {
+      document.querySelector("#search").focus({ preventScroll: true });
+    });
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js")
+        .catch(error => {
+          status.textContent = `离线应用暂不可用：${error.message}`;
+          status.style.color = "#a33d31";
+        });
     }
     render();
     loadCloudItems();

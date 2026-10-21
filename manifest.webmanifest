@@ -1,0 +1,35 @@
+{
+  "id": "./",
+  "name": "琼史 · 海南历史与地理",
+  "short_name": "琼史",
+  "description": "随身查询海南历史、市县乡村、名胜古迹、交通与产业资料。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#f1f8f4",
+  "theme_color": "#087f78",
+  "categories": ["education", "travel", "books"],
+  "icons": [
+    {
+      "src": "./icons/qiong-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/qiong-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/qiong-app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
