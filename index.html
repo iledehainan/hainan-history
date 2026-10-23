@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="琼史">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="description" content="琼史随身查：海南历史、市县乡村、名胜古迹、景点交通与产业资料。">
+  <meta name="description" content="琼史随身查：海南历史、民族文化与非遗、自然地貌、传统建筑、市县乡村、交通与产业资料。">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/qiong-app.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/qiong-180.png">
@@ -55,6 +55,32 @@
     .stats { display: flex; gap: 27px; margin-top: 19px; color: #ecfffa; font-size: 12px; }
     .stats strong { margin-right: 5px; color: #ffe39c; font-size: 16px; }
     .hero > .result-count { color: #effff9; }
+    .category-section { margin: 0 0 28px; }
+    .category-heading { margin: 0 0 14px; }
+    .category-heading p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .category-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
+    .category-card { display: grid; grid-template-columns: 82px minmax(0, 1fr); align-items: center; gap: 13px; min-height: 118px; padding: 13px; border: 1px solid var(--line); border-radius: 17px; color: var(--ink); background: var(--card); box-shadow: 0 7px 20px #19463d0a; text-align: left; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+    .category-card:hover,.category-card[aria-pressed="true"] { transform: translateY(-2px); border-color: var(--art-color); box-shadow: 0 12px 26px #19463d15; }
+    .category-card:focus-visible { outline: 3px solid var(--art-color); outline-offset: 3px; }
+    .category-art { display: grid; place-items: center; width: 82px; height: 88px; overflow: hidden; border-radius: 13px; background: var(--art-bg); }
+    .category-art svg { width: 74px; height: 74px; }
+    .art-history { --art-color:#c89644; --art-bg:linear-gradient(145deg,#fff1c7,#f8d28a); }
+    .art-city { --art-color:#df7651; --art-bg:linear-gradient(145deg,#ffe1c6,#f3ad88); }
+    .art-buildings { --art-color:#458e9b; --art-bg:linear-gradient(145deg,#d8f2ec,#a5d9ce); }
+    .art-culture { --art-color:#b75d86; --art-bg:linear-gradient(145deg,#f9dbea,#e9aed0); }
+    .art-geography { --art-color:#54916f; --art-bg:linear-gradient(145deg,#e1f2c6,#a8d99e); }
+    .art-landscape { --art-color:#557db1; --art-bg:linear-gradient(145deg,#d9edff,#a9cee9); }
+    .art-transport { --art-color:#d08339; --art-bg:linear-gradient(145deg,#ffedc7,#f5c276); }
+    .category-copy { min-width: 0; }
+    .category-copy strong { display: block; font-size: 15px; line-height: 1.45; }
+    .category-copy small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .category-copy em { display: block; margin-top: 7px; color: var(--art-color); font-size: 10px; font-style: normal; font-weight: 750; }
+    .browse-panel[hidden] { display: none; }
+    .browse-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; }
+    .browse-title { display: flex; align-items: baseline; gap: 12px; }
+    .back-to-topics { padding: 7px 11px; border: 1px solid var(--line); border-radius: 9px; color: var(--green); background: white; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .back-to-topics:hover { border-color: var(--green); background: #f0faf6; }
+    .browse-panel .section-head { margin-top: 0; }
     .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 13px 0 17px; }
     h2 { margin: 0; font-size: 20px; letter-spacing: .02em; }
     .result-count { color: var(--muted); font-size: 13px; }
@@ -113,6 +139,7 @@
     .install-panel p { margin: 8px 0 0; color: #705e43; font-size: 13px; line-height: 1.8; }
     .install-close { padding: 5px 9px; border: 0; border-radius: 8px; color: #795d31; background: #f8e8b6; }
     .mobile-nav { display: none; }
+    @media (max-width: 900px) { .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 800px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .topbar { margin-bottom: 40px; } }
     @media (max-width: 540px) {
       body { background: radial-gradient(ellipse at 100% 4%,#d6f4eb 0,transparent 17rem),var(--paper); }
@@ -131,6 +158,18 @@
       .search-wrap input { font-size: 14px; }
       .shortcut { display: none; }
       .stats { gap: 17px; margin-top: 14px; }
+      .category-section { margin-bottom: 23px; }
+      .category-heading { margin: 0 0 11px; }
+      .category-grid { gap: 9px; }
+      .category-card { grid-template-columns: 56px minmax(0, 1fr); gap: 9px; min-height: 96px; padding: 9px; border-radius: 14px; }
+      .category-art { width: 56px; height: 66px; border-radius: 10px; }
+      .category-art svg { width: 56px; height: 56px; }
+      .category-copy strong { font-size: 12px; }
+      .category-copy small { margin-top: 3px; font-size: 10px; line-height: 1.4; }
+      .category-copy em { margin-top: 5px; font-size: 9px; }
+      .browse-head { align-items: start; flex-direction: column; gap: 8px; }
+      .browse-title { align-items: start; flex-direction: column; gap: 4px; }
+      .back-to-topics { padding: 7px 10px; }
       .section-head { align-items: center; margin-top: 10px; }
       h2 { font-size: 18px; }
       .filters { gap: 7px; margin-bottom: 15px; }
@@ -173,10 +212,10 @@
     <section class="hero" aria-labelledby="page-title">
       <div class="eyebrow">Hainan · History, Places &amp; Travel</div>
       <h1 id="page-title">查询海南，<br>从这里开始。</h1>
-      <p class="intro">按关键词查找海南历史、市县乡村、名胜景点、港口机场、轮渡航线与产业企业。</p>
+      <p class="intro">按关键词查找海南历史、市县乡村、民族文化、自然地貌、建筑古迹、交通与产业资料。</p>
       <label class="search-wrap">
         <span class="search-icon" aria-hidden="true">⌕</span>
-        <input id="search" type="search" placeholder="试试搜索：海口、南山、轮渡、机场、椰树工厂……" autocomplete="off" aria-label="搜索历史、地点、景点、交通或企业">
+        <input id="search" type="search" placeholder="试试搜索：黎锦、黎陶、竹竿舞、羊山火山、珊瑚石……" autocomplete="off" aria-label="搜索海南历史、民族文化、自然地貌、建筑或地点">
         <span class="shortcut">实时搜索</span>
       </label>
       <div class="stats" aria-label="内容统计">
@@ -184,17 +223,58 @@
         <span><strong id="era-total">0</strong>个时期</span>
       </div>
     </section>
+    <section class="category-section" id="category-board" aria-labelledby="category-heading">
+      <div class="category-heading">
+        <h2 id="category-heading">按主题浏览</h2>
+        <p>选择一个板块，查看相关海南历史与文化资料</p>
+      </div>
+      <div class="category-grid" aria-label="海南历史七大主题板块">
+        <button class="category-card art-history" type="button" data-board="history" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M18 17c0-3 2-5 5-5h35v51H23c-3 0-5-2-5-5V17Z" fill="#FFF9E8" stroke="#9E6D2E" stroke-width="3"/><path d="M23 12v51m-8-37h8M32 26h17M32 35h22M32 44h16" stroke="#9E6D2E" stroke-width="3" stroke-linecap="round"/><path d="m51 52 5 5 10-13" stroke="#D17C42" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="category-copy"><strong>历史沿革与人物</strong><small>历史事件 · 海南名人</small><em><span data-board-count="history">0</span> 条资料 →</em></span>
+        </button>
+        <button class="category-card art-city" type="button" data-board="cities" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M10 34 40 13l30 21v35H10V34Z" fill="#FFF4E8" stroke="#A6533D" stroke-width="3"/><path d="M17 34h46M22 34v9m12-9v9m12-9v9m12-9v9M18 45h44M18 64h44" stroke="#A6533D" stroke-width="3" stroke-linecap="round"/><path d="M34 51h12v16H34z" fill="#EBA778" stroke="#A6533D" stroke-width="2"/><path d="M35 17V9h10v8" stroke="#A6533D" stroke-width="3" stroke-linecap="round"/></svg></span>
+          <span class="category-copy"><strong>古城与历史街区</strong><small>海口所城 · 琼州府城</small><em><span data-board-count="cities">0</span> 条资料 →</em></span>
+        </button>
+        <button class="category-card art-buildings" type="button" data-board="buildings" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="m10 34 30-22 30 22H10Z" fill="#E9C778" stroke="#386F72" stroke-width="3" stroke-linejoin="round"/><path d="M17 36h46v31H17z" fill="#F7F5E6" stroke="#386F72" stroke-width="3"/><path d="M12 68h56M25 41v20m15-20v20m15-20v20" stroke="#386F72" stroke-width="4" stroke-linecap="round"/><path d="M36 52h8v15h-8z" fill="#B4D7C8" stroke="#386F72" stroke-width="2"/></svg></span>
+          <span class="category-copy"><strong>古建筑与庙宇</strong><small>孔庙 · 琼台书院 · 古寺</small><em><span data-board-count="buildings">0</span> 条资料 →</em></span>
+        </button>
+        <button class="category-card art-culture" type="button" data-board="culture" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M18 18h44v45H18z" fill="#FFF0F5" stroke="#9A4F73" stroke-width="3"/><path d="M25 18v45m10-45v45m10-45v45m10-45v45M18 29h44M18 40h44M18 51h44" stroke="#CC6C92" stroke-width="2"/><path d="m18 18 44 45m0-45L18 63" stroke="#E7A755" stroke-width="2"/><circle cx="40" cy="40" r="8" fill="#F3C465" stroke="#9A4F73" stroke-width="2"/></svg></span>
+          <span class="category-copy"><strong>黎族文化与非遗</strong><small>黎锦 · 黎陶 · 山歌 · 传承人</small><em><span data-board-count="culture">0</span> 条资料 →</em></span>
+        </button>
+        <button class="category-card art-geography" type="button" data-board="geography" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M42 9c8 5 5 12 12 16s10 8 8 16c-2 7 4 12 1 20-3 8-13 10-21 8-7-2-8-7-15-9-8-2-12-9-11-17 1-7 8-10 8-17 0-8 10-15 18-17Z" fill="#A6D69A" stroke="#477E59" stroke-width="3"/><path d="M24 38c8 4 13 2 20 7s11 7 17 4M28 54c6-3 10-2 14 2" stroke="#F8F5D9" stroke-width="3" stroke-linecap="round"/><circle cx="51" cy="28" r="3" fill="#E18B63"/></svg></span>
+          <span class="category-copy"><strong>海南地理与市县乡村</strong><small>市县 · 乡镇 · 特色村落</small><em><span data-board-count="geography">0</span> 条资料 →</em></span>
+        </button>
+        <button class="category-card art-landscape" type="button" data-board="landscape" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="m7 63 21-32 11 16 12-24 23 40H7Z" fill="#8DB6CC" stroke="#426E91" stroke-width="3" stroke-linejoin="round"/><path d="m22 41 6-10 7 10m11-1 5-17 9 15" fill="#F7F7EC" stroke="#426E91" stroke-width="2" stroke-linejoin="round"/><path d="M12 66c8-4 13 4 21 0s14 4 22 0 11 3 15 1" stroke="#3D9C9C" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="15" r="6" fill="#F2C564"/></svg></span>
+          <span class="category-copy"><strong>自然地貌与名胜</strong><small>羊山火山 · 海岸 · 景观</small><em><span data-board-count="landscape">0</span> 条资料 →</em></span>
+        </button>
+        <button class="category-card art-transport" type="button" data-board="transport" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M11 53h57L57 66H24L11 53Z" fill="#EBA967" stroke="#9A5A35" stroke-width="3" stroke-linejoin="round"/><path d="M26 50V30h22v20m-15-20V18h11v12m4 1 13 18" stroke="#9A5A35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 71c7-4 12 4 19 0s12 4 19 0 12 3 17 0" stroke="#4C9D9B" stroke-width="3" stroke-linecap="round"/></svg></span>
+          <span class="category-copy"><strong>交通与产业</strong><small>港口 · 航班 · 轮渡 · 企业</small><em><span data-board-count="transport">0</span> 条资料 →</em></span>
+        </button>
+      </div>
+    </section>
     <nav class="mobile-nav" aria-label="快捷导航">
       <a href="#page-title" aria-current="page"><span>🌴</span><span>首页</span></a>
-      <a href="#timeline-heading"><span>📜</span><span>查历史</span></a>
-      <a href="#topic-filters"><span>🗺️</span><span>看海南</span></a>
+      <a href="#category-board" data-open-board="history"><span>📜</span><span>查历史</span></a>
+      <a href="#category-board"><span>🗺️</span><span>看海南</span></a>
       <a href="#search" id="mobile-search-link"><span>🔎</span><span>搜索</span></a>
     </nav>
 
-    <section aria-labelledby="timeline-heading">
+    <section class="browse-panel" id="browse-panel" aria-labelledby="timeline-heading" hidden>
       <div class="section-head">
-        <h2 id="timeline-heading">查询海南历史、地理与出行</h2>
-        <span class="result-count" id="result-count" aria-live="polite"></span>
+        <div class="browse-head">
+          <div class="browse-title">
+            <h2 id="timeline-heading">查询海南历史、地理与出行</h2>
+            <span class="result-count" id="result-count" aria-live="polite"></span>
+          </div>
+          <button class="back-to-topics" id="back-to-topics" type="button">← 返回七大板块</button>
+        </div>
       </div>
       <nav class="filters" id="era-filters" aria-label="按历史时期筛选"></nav>
       <nav class="filters" id="topic-filters" aria-label="按资料主题筛选"></nav>
@@ -208,7 +288,7 @@
       </div>
       <div class="grid" id="results"></div>
     </section>
-    <footer>本页为入门级历史索引，年代与人物简介作概览使用。涉及复杂历史背景或不同史料说法时，建议结合地方志、正史及专题研究进一步核对。启用统计后，访问量与国家汇总由 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare Web Analytics</a> 处理；点赞去重使用浏览器本地随机标识，评价经管理员审核后公开。</footer>
+    <footer>本页为入门级历史索引，年代与人物简介作概览使用。涉及复杂历史背景或不同史料说法时，建议结合地方志、正史及专题研究进一步核对。海南摄影作品与更多内容可访问 <a href="https://www.douyin.com/search/69403072074?type=user" target="_blank" rel="noopener noreferrer">Grand Autruche · 抖音号 69403072074</a>。启用统计后，访问量与国家汇总由 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare Web Analytics</a> 处理；点赞去重使用浏览器本地随机标识，评价经管理员审核后公开。</footer>
   </main>
 
   <dialog id="detail-dialog" aria-labelledby="dialog-title">
@@ -255,6 +335,8 @@
     import { maritimeEntries } from "./maritime-history.js";
     import { architectureEntries } from "./architecture-history.js";
     import { referenceEntries } from "./reference-entries.js";
+    import { templeHistoryEntries } from "./temple-history.js";
+    import { cultureLandscapeEntries } from "./culture-landscape.js";
     const periods = ["全部时期", "先秦至汉", "魏晋至宋元", "明清时期", "近现代", "当代"];
     let items = [
       { id: "han-commandery", period: "先秦至汉", type: "event", date: "公元前110年", title: "汉武帝设珠崖、儋耳郡", place: "海南岛", summary: "汉武帝元鼎六年，中央王朝在海南岛设置珠崖郡、儋耳郡，标志着对海南的郡县治理开始。", detail: "西汉在海南岛设置珠崖、儋耳两郡，郡县治所与辖境历来有史料考订。汉昭帝始元五年（公元前82年），珠崖郡因地方局势等原因被撤并。此后历代对海南的建置与实际治理多有变化。", note: "公元前110年为通行纪年，具体建置沿革可参照《汉书·地理志》及海南地方志。" },
@@ -287,7 +369,7 @@
       "free-trade-port": 2018
     };
     items.forEach(item => { item.year ??= knownYears[item.id] ?? 999999; });
-    items = [...items, ...maritimeEntries, ...architectureEntries, ...referenceEntries];
+    items = [...items, ...maritimeEntries, ...architectureEntries, ...referenceEntries, ...templeHistoryEntries, ...cultureLandscapeEntries];
 
     const results = document.querySelector("#results");
     const search = document.querySelector("#search");
@@ -318,13 +400,72 @@
       administration: "市县乡村",
       villages: "村落",
       heritage: "名胜古迹",
+      temples: "庙宇祠庙",
+      ethnicCulture: "民族文化与非遗",
+      landforms: "自然地貌",
+      architectureMaterials: "建筑与地方材料",
       tourism: "旅游景点",
       ports: "港口码头",
       aviation: "机场航班",
       ferry: "轮渡铁路",
       industry: "工厂企业"
     };
+    const boards = {
+      history: { title: "历史沿革与人物", categories: ["heritage"], types: ["person", "event"] },
+      cities: { title: "古城与历史街区", categories: ["heritage", "villages"], types: [] },
+      buildings: { title: "古建筑与庙宇", categories: ["heritage", "temples", "architectureMaterials"], types: [] },
+      culture: { title: "黎族文化与非遗", categories: ["ethnicCulture"], types: [] },
+      geography: { title: "海南地理与市县乡村", categories: ["administration", "villages"], types: [] },
+      landscape: { title: "自然地貌与名胜", categories: ["landforms", "tourism", "architectureMaterials", "heritage"], types: [] },
+      transport: { title: "交通与产业", categories: ["ports", "aviation", "ferry", "industry"], types: ["trade"] }
+    };
     const tabs = document.querySelector(".type-tabs");
+    const browsePanel = document.querySelector("#browse-panel");
+    const browseHeading = document.querySelector("#timeline-heading");
+    let selectedBoard = null;
+
+    function matchesBoard(item, board) {
+      return board.categories.includes(item.category) || board.types.includes(item.type);
+    }
+
+    function updateBoardCounts() {
+      for (const button of document.querySelectorAll(".category-card")) {
+        const board = boards[button.dataset.board];
+        const count = items.filter(item => matchesBoard(item, board)).length;
+        button.querySelector(`[data-board-count="${button.dataset.board}"]`).textContent = count;
+      }
+    }
+
+    function updateBrowseVisibility() {
+      browsePanel.hidden = !selectedBoard && !search.value.trim();
+      browseHeading.textContent = selectedBoard
+        ? boards[selectedBoard].title
+        : search.value.trim() ? "搜索海南历史与文化资料" : "查询海南历史、地理与出行";
+    }
+
+    function activateBoard(boardId) {
+      selectedBoard = boardId;
+      selectedPeriod = "全部时期";
+      selectedType = "all";
+      selectedCategory = "all";
+      search.value = "";
+      document.querySelectorAll(".category-card").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.board === boardId));
+      });
+      eraFilters.querySelectorAll(".filter").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.textContent === selectedPeriod));
+      });
+      topicFilters.querySelectorAll(".filter").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.textContent === "全部主题"));
+      });
+      document.querySelectorAll(".type-tab").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.type === selectedType));
+      });
+      updateBrowseVisibility();
+      render();
+      browsePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
     for (const [type, name] of Object.entries(typeNames).slice(3)) {
       const button = document.createElement("button");
       button.className = "type-tab";
@@ -376,16 +517,42 @@
         render();
       });
     });
-    search.addEventListener("input", render);
+    document.querySelectorAll(".category-card").forEach(button => {
+      button.addEventListener("click", () => activateBoard(button.dataset.board));
+    });
+    document.querySelector("#back-to-topics").addEventListener("click", () => {
+      selectedBoard = null;
+      selectedPeriod = "全部时期";
+      selectedType = "all";
+      selectedCategory = "all";
+      search.value = "";
+      document.querySelectorAll(".category-card").forEach(button => button.setAttribute("aria-pressed", "false"));
+      document.querySelectorAll(".filter").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.textContent === "全部时期" || button.textContent === "全部主题"));
+      });
+      document.querySelectorAll(".type-tab").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.type === "all")));
+      updateBrowseVisibility();
+      render();
+      document.querySelector("#category-board").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    search.addEventListener("input", () => {
+      updateBrowseVisibility();
+      render();
+    });
+    document.querySelectorAll(".mobile-nav [data-open-board]").forEach(link => {
+      link.addEventListener("click", () => activateBoard(link.dataset.openBoard));
+    });
 
     function render() {
+      updateBoardCounts();
       const query = search.value.trim().toLocaleLowerCase("zh-CN");
       const filtered = items.slice().sort((a, b) => (a.year ?? sortYear(a)) - (b.year ?? sortYear(b))).filter(item => {
         const matchesPeriod = selectedPeriod === "全部时期" || item.period === selectedPeriod;
         const matchesType = selectedType === "all" || item.type === selectedType;
         const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+        const matchesActiveBoard = !selectedBoard || matchesBoard(item, boards[selectedBoard]);
         const searchable = [item.title, item.period, item.date, item.place, item.summary, item.detail, item.source, item.source_url, categoryNames[item.category]].join(" ").toLocaleLowerCase("zh-CN");
-        return matchesPeriod && matchesType && matchesCategory && searchable.includes(query);
+        return matchesPeriod && matchesType && matchesCategory && matchesActiveBoard && searchable.includes(query);
       });
       document.querySelector("#item-total").textContent = items.length;
       resultCount.textContent = `找到 ${filtered.length} 条`;
