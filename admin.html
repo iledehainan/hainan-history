@@ -90,7 +90,7 @@
           <div class="actions"><button class="button" id="import-csv" type="button">导入所选文件</button></div>
         </div>
       </div>
-      <p class="muted">“网站约”包含88条内置资料；如把同名内置资料再次导入，主页会合并显示，但云端数量仍会单独计数。</p>
+      <p class="muted">“网站约”包含89条内置资料；如把同名内置资料再次导入，主页会合并显示，但云端数量仍会单独计数。</p>
       <div class="toolbar">
         <h2 style="margin:0">云端资料：<span id="entry-count">0</span> 条</h2>
         <button class="button" id="sign-out" type="button">退出登录</button>
@@ -171,7 +171,7 @@
       const { data, error, count } = await client.from("history_entries")
         .select("*", { count: "exact" }).order("year").order("title").limit(1000);
       if (error) return message(`读取资料失败：${error.message}`, true);
-      const total = 88 + data.length;
+      const total = 89 + data.length;
       const missing = Math.max(0, 500 - total);
       document.querySelector("#entry-count").textContent = `${count ?? data.length} · 网站约 ${total} 条，距离500条还差 ${missing} 条`;
       list.replaceChildren();

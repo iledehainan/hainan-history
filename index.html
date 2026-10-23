@@ -52,6 +52,16 @@
     .search-wrap input { flex: 1; min-width: 0; padding: 8px 0; border: 0; outline: 0; color: var(--ink); background: transparent; }
     .search-wrap input::placeholder { color: #9ba19b; }
     .shortcut { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); font-size: 11px; }
+    .search-suggestions { position: relative; z-index: 2; max-width: 730px; margin-top: 8px; overflow: hidden; border: 1px solid #dcece5; border-radius: 13px; color: var(--ink); background: white; box-shadow: 0 12px 30px #123b3024; }
+    .search-suggestions[hidden] { display: none; }
+    .suggestion-list { display: grid; }
+    .suggestion-item { display: grid; gap: 4px; padding: 11px 14px; border: 0; border-bottom: 1px solid #edf3ef; color: var(--ink); background: white; text-align: left; }
+    .suggestion-item:hover,.suggestion-item:focus-visible { background: #f0faf6; outline: 0; }
+    .suggestion-title { font-size: 13px; font-weight: 750; }
+    .suggestion-meta { color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .suggestion-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 14px; color: var(--muted); font-size: 11px; }
+    .suggestion-all { padding: 5px 0; border: 0; color: var(--green); background: none; font-size: 11px; font-weight: 750; }
+    .suggestion-empty { padding: 14px; color: var(--muted); font-size: 12px; }
     .stats { display: flex; gap: 27px; margin-top: 19px; color: #ecfffa; font-size: 12px; }
     .stats strong { margin-right: 5px; color: #ffe39c; font-size: 16px; }
     .hero > .result-count { color: #effff9; }
@@ -156,6 +166,8 @@
       .intro { max-width: 88%; font-size: 13px; line-height: 1.75; }
       .search-wrap { margin-top: 17px; padding-left: 13px; }
       .search-wrap input { font-size: 14px; }
+      .search-suggestions { max-width: none; }
+      .suggestion-item { padding: 10px 12px; }
       .shortcut { display: none; }
       .stats { gap: 17px; margin-top: 14px; }
       .category-section { margin-bottom: 23px; }
@@ -215,9 +227,10 @@
       <p class="intro">按关键词查找海南历史、市县乡村、民族文化、自然地貌、建筑古迹、交通与产业资料。</p>
       <label class="search-wrap">
         <span class="search-icon" aria-hidden="true">⌕</span>
-        <input id="search" type="search" placeholder="试试搜索：黎锦、黎陶、竹竿舞、羊山火山、珊瑚石……" autocomplete="off" aria-label="搜索海南历史、民族文化、自然地貌、建筑或地点">
+        <input id="search" type="search" placeholder="试试搜索：潘存、溪北书院、黎锦、羊山火山……" autocomplete="off" aria-label="搜索海南历史、民族文化、自然地貌、建筑或地点" aria-controls="search-suggestions" aria-expanded="false">
         <span class="shortcut">实时搜索</span>
       </label>
+      <div class="search-suggestions" id="search-suggestions" role="region" aria-label="即时搜索结果" aria-live="polite" hidden></div>
       <div class="stats" aria-label="内容统计">
         <span><strong id="item-total">0</strong>条查询资料</span>
         <span><strong id="era-total">0</strong>个时期</span>
@@ -438,9 +451,9 @@
 
     function updateBrowseVisibility() {
       browsePanel.hidden = !selectedBoard && !search.value.trim();
-      browseHeading.textContent = selectedBoard
-        ? boards[selectedBoard].title
-        : search.value.trim() ? "搜索海南历史与文化资料" : "查询海南历史、地理与出行";
+      browseHeading.textContent = search.value.trim()
+        ? "搜索海南历史与文化资料"
+        : selectedBoard ? boards[selectedBoard].title : "查询海南历史、地理与出行";
     }
 
     function activateBoard(boardId) {
@@ -546,14 +559,16 @@
     function render() {
       updateBoardCounts();
       const query = search.value.trim().toLocaleLowerCase("zh-CN");
+      const searching = Boolean(query);
       const filtered = items.slice().sort((a, b) => (a.year ?? sortYear(a)) - (b.year ?? sortYear(b))).filter(item => {
-        const matchesPeriod = selectedPeriod === "全部时期" || item.period === selectedPeriod;
-        const matchesType = selectedType === "all" || item.type === selectedType;
-        const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
-        const matchesActiveBoard = !selectedBoard || matchesBoard(item, boards[selectedBoard]);
+        const matchesPeriod = searching || selectedPeriod === "全部时期" || item.period === selectedPeriod;
+        const matchesType = searching || selectedType === "all" || item.type === selectedType;
+        const matchesCategory = searching || selectedCategory === "all" || item.category === selectedCategory;
+        const matchesActiveBoard = searching || !selectedBoard || matchesBoard(item, boards[selectedBoard]);
         const searchable = [item.title, item.period, item.date, item.place, item.summary, item.detail, item.source, item.source_url, categoryNames[item.category]].join(" ").toLocaleLowerCase("zh-CN");
         return matchesPeriod && matchesType && matchesCategory && matchesActiveBoard && searchable.includes(query);
       });
+      renderSearchSuggestions(filtered);
       document.querySelector("#item-total").textContent = items.length;
       resultCount.textContent = `找到 ${filtered.length} 条`;
       results.replaceChildren();
@@ -594,6 +609,54 @@
         article.append(top, title, summary, bottom);
         results.append(article);
       }
+    }
+
+    function renderSearchSuggestions(filtered) {
+      const panel = document.querySelector("#search-suggestions");
+      const query = search.value.trim();
+      search.setAttribute("aria-expanded", String(Boolean(query)));
+      panel.replaceChildren();
+      panel.hidden = !query;
+      if (!query) return;
+
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "suggestion-empty";
+        empty.textContent = "没有找到相关资料。试试搜索“潘存”或“溪北书院”。";
+        panel.append(empty);
+        return;
+      }
+
+      const list = document.createElement("div");
+      list.className = "suggestion-list";
+      for (const item of filtered.slice(0, 5)) {
+        const button = document.createElement("button");
+        button.className = "suggestion-item";
+        button.type = "button";
+        const title = document.createElement("span");
+        title.className = "suggestion-title";
+        title.textContent = item.title;
+        const summary = document.createElement("span");
+        summary.className = "suggestion-meta";
+        summary.textContent = `${item.summary} · ${item.place}`;
+        button.append(title, summary);
+        button.addEventListener("click", () => showDetail(item));
+        list.append(button);
+      }
+      panel.append(list);
+
+      const footer = document.createElement("div");
+      footer.className = "suggestion-footer";
+      const count = document.createElement("span");
+      count.textContent = `找到 ${filtered.length} 条资料`;
+      footer.append(count);
+      const allButton = document.createElement("button");
+      allButton.className = "suggestion-all";
+      allButton.type = "button";
+      allButton.textContent = "查看全部结果 ↓";
+      allButton.addEventListener("click", () => browsePanel.scrollIntoView({ behavior: "smooth", block: "start" }));
+      footer.append(allButton);
+      panel.append(footer);
     }
 
     function showDetail(item) {
