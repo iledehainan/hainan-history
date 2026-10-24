@@ -16,6 +16,7 @@ create table if not exists public.history_entries (
   detail text not null,
   source text not null default '',
   source_url text not null default '',
+  image_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

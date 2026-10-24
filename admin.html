@@ -34,8 +34,13 @@
     .entry { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:13px 0; border-top:1px solid var(--line); }
     .entry-title { font-weight:700; }
     .entry-meta { margin-top:4px; color:var(--muted); font-size:12px; }
+    .entry-image { width:74px; height:54px; flex:0 0 auto; border-radius:7px; object-fit:cover; background:#edf3ef; }
     .entry-actions { display:flex; gap:7px; flex-shrink:0; }
     .entry-actions button { padding:6px 9px; border:1px solid var(--line); border-radius:6px; background:white; }
+    .image-field { display:grid; gap:9px; }
+    .image-help { color:var(--muted); font-size:11px; line-height:1.6; }
+    .image-preview-wrap { display:flex; align-items:center; gap:12px; }
+    .image-preview { width:min(260px,65%); max-height:160px; aspect-ratio:16/9; border:1px solid var(--line); border-radius:8px; object-fit:cover; background:#edf3ef; }
     .feedback-row { padding:14px 0; border-top:1px solid var(--line); }
     .feedback-content { margin:7px 0; white-space:pre-wrap; }
     .import-box { margin-top:22px; padding-top:18px; border-top:1px solid var(--line); }
@@ -75,6 +80,15 @@
             <label>地点<input name="place" maxlength="120" placeholder="例如：琼州海峡、儋州"></label>
             <label class="wide">摘要<input name="summary" maxlength="400" required></label>
             <label class="wide">详细说明<textarea name="detail" maxlength="5000" required></textarea></label>
+            <div class="wide image-field">
+              <label for="entry-image">资料图片</label>
+              <input id="entry-image" type="file" accept="image/jpeg,image/png,image/webp">
+              <span class="image-help">支持 JPG、PNG、WebP，单张不超过 5 MB。上传后图片可在网站公开查看。</span>
+              <span class="image-preview-wrap" id="image-preview-wrap" hidden>
+                <img class="image-preview" id="image-preview" alt="资料图片预览">
+                <button class="button" id="remove-image" type="button">移除图片</button>
+              </span>
+            </div>
             <label>资料来源<input name="source" maxlength="250" placeholder="书名、档案或机构"></label>
             <label>来源链接<input name="source_url" type="url" maxlength="1000" placeholder="https://..."></label>
           </div>
@@ -85,7 +99,7 @@
         </form>
         <div class="import-box">
           <h2>批量导入 CSV</h2>
-          <p class="muted">CSV 表头必须包含 <code>year,period,type,date,title,place,summary,detail</code>；可选列：<code>source,source_url</code>。条目类别可用 person、event、trade、place、artifact。建议先导入少量样例并检查显示效果。<a href="./history-import-template.csv" download>下载含南海贸易示例的 CSV 模板</a> · <a href="./history-architecture-import.csv" download>下载历史建筑、古迹与村落资料（10条，请勿重复导入）</a></p>
+          <p class="muted">CSV 表头必须包含 <code>year,period,type,date,title,place,summary,detail</code>；可选列：<code>source,source_url</code>。条目类别可用 person、event、trade、place、artifact。图片请在保存条目后通过上方资料图片控件上传。建议先导入少量样例并检查显示效果。<a href="./history-import-template.csv" download>下载含南海贸易示例的 CSV 模板</a> · <a href="./history-architecture-import.csv" download>下载历史建筑、古迹与村落资料（10条，请勿重复导入）</a></p>
           <label>选择 UTF-8 CSV 文件<input id="csv-file" type="file" accept=".csv,text/csv"></label>
           <div class="actions"><button class="button" id="import-csv" type="button">导入所选文件</button></div>
         </div>
@@ -109,7 +123,18 @@
     const workspace = document.querySelector("#workspace");
     const form = document.querySelector("#entry-form");
     const list = document.querySelector("#entry-list");
+    const imageInput = document.querySelector("#entry-image");
+    const imagePreview = document.querySelector("#image-preview");
+    const imagePreviewWrap = document.querySelector("#image-preview-wrap");
+    const imageRemoveButton = document.querySelector("#remove-image");
+    const imageBucket = "history-images";
+    const maxImageSize = 5 * 1024 * 1024;
     let client;
+    let selectedImage = null;
+    let currentImageUrl = "";
+    let removeCurrentImage = false;
+    let removeImageUrl = "";
+    let previewObjectUrl = "";
 
     function message(text, error = false) {
       notice.textContent = text;
@@ -182,6 +207,15 @@
       for (const entry of data) {
         const row = document.createElement("div");
         row.className = "entry";
+        if (entry.image_url) {
+          const image = document.createElement("img");
+          image.className = "entry-image";
+          image.src = entry.image_url;
+          image.alt = "";
+          image.loading = "lazy";
+          image.addEventListener("error", () => image.remove(), { once: true });
+          row.append(image);
+        }
         const text = document.createElement("div");
         const title = document.createElement("div");
         title.className = "entry-title";
@@ -271,6 +305,12 @@
       for (const field of form.elements) {
         if (field.name && Object.hasOwn(entry, field.name)) field.value = entry[field.name] ?? "";
       }
+      selectedImage = null;
+      removeCurrentImage = false;
+      removeImageUrl = "";
+      currentImageUrl = entry.image_url ?? "";
+      imageInput.value = "";
+      showImagePreview(currentImageUrl);
       document.querySelector("#form-heading").textContent = "编辑历史资料";
       document.querySelector("#cancel-edit").hidden = false;
       form.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -279,9 +319,57 @@
     function resetForm() {
       form.reset();
       form.elements.id.value = "";
+      selectedImage = null;
+      currentImageUrl = "";
+      removeCurrentImage = false;
+      removeImageUrl = "";
+      imageInput.value = "";
+      showImagePreview("");
       document.querySelector("#form-heading").textContent = "添加历史资料";
       document.querySelector("#cancel-edit").hidden = true;
     }
+
+    function showImagePreview(url) {
+      if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+      previewObjectUrl = url?.startsWith("blob:") ? url : "";
+      imagePreview.src = url;
+      imagePreviewWrap.hidden = !url;
+    }
+
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (!file) {
+        selectedImage = null;
+        showImagePreview(currentImageUrl);
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        imageInput.value = "";
+        selectedImage = null;
+        showImagePreview(currentImageUrl);
+        return message("图片格式仅支持 JPG、PNG 或 WebP。", true);
+      }
+      if (file.size > maxImageSize) {
+        imageInput.value = "";
+        selectedImage = null;
+        showImagePreview(currentImageUrl);
+        return message("图片不能超过 5 MB。", true);
+      }
+      selectedImage = file;
+      if (removeCurrentImage) currentImageUrl = removeImageUrl;
+      removeCurrentImage = false;
+      removeImageUrl = "";
+      showImagePreview(URL.createObjectURL(file));
+    });
+
+    imageRemoveButton.addEventListener("click", () => {
+      selectedImage = null;
+      imageInput.value = "";
+      removeCurrentImage = Boolean(currentImageUrl);
+      removeImageUrl = currentImageUrl;
+      currentImageUrl = "";
+      showImagePreview("");
+    });
 
     document.querySelector("#cancel-edit").addEventListener("click", resetForm);
 
@@ -296,8 +384,35 @@
         summary: values.summary.trim(),
         detail: values.detail.trim(),
         source: values.source.trim(),
-        source_url: values.source_url.trim()
+        source_url: values.source_url.trim(),
+        image_url: removeCurrentImage ? null : currentImageUrl || null
       };
+    }
+
+    async function uploadEntryImage(entryId, file) {
+      const extensions = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+      const path = `${entryId}/${crypto.randomUUID()}.${extensions[file.type]}`;
+      const { error: uploadError } = await client.storage.from(imageBucket).upload(path, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false
+      });
+      if (uploadError) throw uploadError;
+      const { data } = client.storage.from(imageBucket).getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    function imageStoragePath(publicUrl) {
+      if (!publicUrl) return null;
+      const publicPrefix = `${SUPABASE_URL}/storage/v1/object/public/${imageBucket}/`;
+      return publicUrl.startsWith(publicPrefix) ? decodeURIComponent(publicUrl.slice(publicPrefix.length)) : null;
+    }
+
+    async function deleteStoredImage(publicUrl) {
+      const path = imageStoragePath(publicUrl);
+      if (!path) return;
+      const { error } = await client.storage.from(imageBucket).remove([path]);
+      if (error) throw error;
     }
 
     form.addEventListener("submit", async event => {
@@ -305,12 +420,60 @@
       const values = Object.fromEntries(new FormData(form));
       const id = values.id;
       const record = formRecord(values);
-      const result = id
-        ? await client.from("history_entries").update({ ...record, updated_at: new Date().toISOString() }).eq("id", id)
-        : await client.from("history_entries").insert(record);
-      if (result.error) return message(`保存失败：${result.error.message}`, true);
+      const previousImageUrl = removeCurrentImage ? removeImageUrl : currentImageUrl;
+      let savedEntry;
+      if (id) {
+        const { data, error } = await client.from("history_entries")
+          .update({ ...record, updated_at: new Date().toISOString() }).eq("id", id).select().single();
+        if (error) return message(`保存失败：${error.message}`, true);
+        savedEntry = data;
+      } else {
+        const { data, error } = await client.from("history_entries").insert(record).select().single();
+        if (error) return message(`保存失败：${error.message}`, true);
+        savedEntry = data;
+        form.elements.id.value = savedEntry.id;
+      }
+
+      if (selectedImage) {
+        let uploadedUrl;
+        try {
+          uploadedUrl = await uploadEntryImage(savedEntry.id, selectedImage);
+        } catch (error) {
+          return message(`资料已保存，但图片上传失败：${error.message}`, true);
+        }
+        const { data, error } = await client.from("history_entries")
+          .update({ image_url: uploadedUrl, updated_at: new Date().toISOString() })
+          .eq("id", savedEntry.id).select().single();
+        if (error) {
+          try {
+            await deleteStoredImage(uploadedUrl);
+          } catch (cleanupError) {
+            return message(`图片链接保存失败：${error.message}；临时图片清理失败：${cleanupError.message}`, true);
+          }
+          return message(`资料已保存，但图片链接保存失败：${error.message}`, true);
+        }
+        savedEntry = data;
+      }
+
+      let saveNotice = "资料已保存。";
+      let saveNoticeIsError = false;
+      if (removeCurrentImage && previousImageUrl) {
+        try {
+          await deleteStoredImage(previousImageUrl);
+        } catch (error) {
+          saveNotice = `资料已保存，但旧图片清理失败：${error.message}`;
+          saveNoticeIsError = true;
+        }
+      } else if (selectedImage && previousImageUrl && previousImageUrl !== savedEntry.image_url) {
+        try {
+          await deleteStoredImage(previousImageUrl);
+        } catch (error) {
+          saveNotice = `资料和新图片已保存，但旧图片清理失败：${error.message}`;
+          saveNoticeIsError = true;
+        }
+      }
       resetForm();
-      message("资料已保存。");
+      message(saveNotice, saveNoticeIsError);
       await loadEntries();
     });
 
@@ -318,7 +481,17 @@
       if (!confirm(`确定删除“${entry.title}”吗？此操作不可撤销。`)) return;
       const { error } = await client.from("history_entries").delete().eq("id", entry.id);
       if (error) return message(`删除失败：${error.message}`, true);
-      message("资料已删除。");
+      let deleteNotice = "资料已删除。";
+      let deleteNoticeIsError = false;
+      if (entry.image_url) {
+        try {
+          await deleteStoredImage(entry.image_url);
+        } catch (imageError) {
+          deleteNotice = `资料已删除，但图片清理失败：${imageError.message}`;
+          deleteNoticeIsError = true;
+        }
+      }
+      message(deleteNotice, deleteNoticeIsError);
       await loadEntries();
     }
 

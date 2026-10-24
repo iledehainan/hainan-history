@@ -27,6 +27,12 @@
 
 任何人都能读取公开历史条目；只有在 `history_admins` 表中登记的用户能新增、编辑或删除资料。用户注册应保持关闭。不要将管理员密码或 `service_role` key 提交到仓库。
 
+## 后台上传资料图片
+
+在 Supabase SQL Editor 中执行仓库的 `supabase-image-storage.sql`。此迁移可重复执行：为 `history_entries` 增加图片地址字段，并创建公开读取的 `history-images` 图片 bucket；上传、替换和删除图片仅允许 `history_admins` 中的管理员。网站后台支持 JPG、PNG、WebP，单张最大 5 MB。上传的图片会公开显示在资料卡片和详情页。
+
+在 `/admin.html` 编辑或新增资料时选择图片并保存。替换或移除已有图片时，后台会同步更新图片地址并尝试清理旧文件。迁移未执行或 Storage 未配置时，后台会显示 Supabase 返回的错误。
+
 ## 点赞与评价审核
 
 1. 在 Supabase SQL Editor 执行 `supabase-feedback.sql`，创建反馈表、公开汇总函数和 RLS 策略。

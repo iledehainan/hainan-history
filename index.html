@@ -111,6 +111,7 @@
     .entry:nth-child(5n + 5) { --card-accent: #9b83c8; }
     .entry:hover { transform: translateY(-3px); box-shadow: 0 12px 28px #24372b16; }
     .entry:focus-visible { outline: 3px solid var(--card-accent, #18a999); outline-offset: 3px; }
+    .entry-image { display: block; width: calc(100% + 40px); max-height: 210px; aspect-ratio: 16 / 9; margin: -20px -20px 15px; border-radius: 12px 12px 0 0; object-fit: cover; background: #edf3ef; }
     .entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .tag { padding: 5px 9px; border-radius: 999px; color: #087f78; background: #ddf5ec; font-size: 11px; font-weight: 700; }
     .tag.event { color: #a84d31; background: #fff0df; }
@@ -128,6 +129,7 @@
     .dialog-top { position: sticky; z-index: 1; top: -27px; display: flex; justify-content: space-between; gap: 14px; align-items: start; margin: -27px -27px 0; padding: 27px 27px 8px; background: var(--card); }
     .dialog-inner h2 { margin: 16px 0 10px; font-size: 24px; line-height: 1.4; }
     .dialog-inner p { color: var(--muted); font-size: 14px; line-height: 1.9; }
+    .dialog-image { display: block; width: 100%; max-height: 360px; margin: 10px 0 18px; border-radius: 12px; object-fit: contain; background: #edf3ef; }
     .dialog-close { flex: 0 0 auto; min-height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--green); background: white; font-size: 13px; font-weight: 700; }
     .source-note { margin-top: 23px; padding-top: 14px; border-top: 1px solid var(--line); color: #848d86; font-size: 11px; line-height: 1.7; }
     .feedback { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
@@ -189,6 +191,7 @@
       .filter { padding: 8px 11px; font-size: 11px; }
       .grid { grid-template-columns: 1fr; gap: 11px; }
       .entry { min-height: 0; padding: 16px; border-radius: 15px; }
+      .entry-image { width: calc(100% + 32px); max-height: 220px; margin: -16px -16px 13px; }
       .entry h3 { margin-top: 12px; }
       .toolbar { align-items: start; flex-direction: column; gap: 9px; margin-bottom: 12px; }
       .type-tabs { gap: 10px 15px; }
@@ -318,6 +321,7 @@
         </div>
         <button class="dialog-close" id="dialog-close" type="button">← 返回</button>
       </div>
+      <img id="dialog-image" class="dialog-image" alt="" hidden>
       <p id="dialog-description"></p>
       <div class="source-note" id="dialog-note"></div>
       <section class="feedback" aria-label="点赞与评价">
@@ -597,6 +601,15 @@
         });
         const top = document.createElement("div");
         top.className = "entry-top";
+        if (item.image_url) {
+          const image = document.createElement("img");
+          image.className = "entry-image";
+          image.src = item.image_url;
+          image.alt = "";
+          image.loading = "lazy";
+          image.addEventListener("error", () => image.remove(), { once: true });
+          article.append(image);
+        }
         const tag = document.createElement("span");
         tag.className = `tag${item.type === "event" ? " event" : ""}`;
         tag.textContent = categoryNames[item.category] ?? typeNames[item.type] ?? "历史条目";
@@ -678,6 +691,12 @@
       document.querySelector("#dialog-title").textContent = item.title;
       document.querySelector("#dialog-date").textContent = `${item.date}  ·  ${item.place}`;
       document.querySelector("#dialog-description").textContent = item.detail;
+      const image = document.querySelector("#dialog-image");
+      image.hidden = !item.image_url;
+      image.alt = item.image_url ? `${item.title}图片` : "";
+      image.onerror = () => { image.hidden = true; };
+      if (item.image_url) image.src = item.image_url;
+      else image.removeAttribute("src");
       const source = item.source ? `资料来源：${item.source}` : "";
       const sourceUrl = item.source_url ? ` · ${item.source_url}` : "";
       document.querySelector("#dialog-note").textContent = [item.note, source + sourceUrl].filter(Boolean).join("  ");
@@ -828,7 +847,7 @@
           ...localItems.filter(item => !data.some(entry => entry.title === item.title)),
           ...data.map(entry => {
             const localItem = localByTitle.get(entry.title);
-            return { ...localItem, ...entry, category: entry.category ?? localItem?.category };
+            return { ...localItem, ...entry, category: entry.category ?? localItem?.category, image_url: entry.image_url ?? localItem?.image_url };
           })
         ];
         status.textContent = `云端资料已同步 · 共 ${items.length} 条`;
