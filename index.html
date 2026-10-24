@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="琼史">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="description" content="琼史随身查：海南历史、民族文化与非遗、自然地貌、传统建筑、市县乡村、交通与产业资料。">
+  <meta name="description" content="琼史随身查：海南历史、民族文化与非遗、自然地貌、传统建筑、高校与科研文化机构、市县乡村、交通与产业资料。">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/qiong-app.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="./icons/qiong-180.png">
@@ -93,6 +93,7 @@
     .art-geography { --art-color:#54916f; --art-bg:linear-gradient(145deg,#e1f2c6,#a8d99e); }
     .art-landscape { --art-color:#557db1; --art-bg:linear-gradient(145deg,#d9edff,#a9cee9); }
     .art-transport { --art-color:#d08339; --art-bg:linear-gradient(145deg,#ffedc7,#f5c276); }
+    .art-research { --art-color:#685ca8; --art-bg:linear-gradient(145deg,#e9e3ff,#c7c0f0); }
     .category-copy { min-width: 0; }
     .category-copy strong { display: block; font-size: 15px; line-height: 1.45; }
     .category-copy small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.55; }
@@ -278,7 +279,7 @@
       <div class="category-heading">
         <h2 id="category-heading">按主题浏览</h2>
       </div>
-      <div class="category-grid" aria-label="海南历史七大主题板块">
+      <div class="category-grid" aria-label="海南历史与文化八大主题板块">
         <button class="category-card art-history" type="button" data-board="history" aria-pressed="false">
           <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M18 17c0-3 2-5 5-5h35v51H23c-3 0-5-2-5-5V17Z" fill="#FFF9E8" stroke="#9E6D2E" stroke-width="3"/><path d="M23 12v51m-8-37h8M32 26h17M32 35h22M32 44h16" stroke="#9E6D2E" stroke-width="3" stroke-linecap="round"/><path d="m51 52 5 5 10-13" stroke="#D17C42" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="category-copy"><strong>历史沿革与人物</strong><small>历史事件 · 海南名人</small><em><span data-board-count="history">0</span> 条资料 →</em></span>
@@ -307,6 +308,10 @@
           <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M11 53h57L57 66H24L11 53Z" fill="#EBA967" stroke="#9A5A35" stroke-width="3" stroke-linejoin="round"/><path d="M26 50V30h22v20m-15-20V18h11v12m4 1 13 18" stroke="#9A5A35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 71c7-4 12 4 19 0s12 4 19 0 12 3 17 0" stroke="#4C9D9B" stroke-width="3" stroke-linecap="round"/></svg></span>
           <span class="category-copy"><strong>交通与产业</strong><small>港口 · 航班 · 轮渡 · 企业</small><em><span data-board-count="transport">0</span> 条资料 →</em></span>
         </button>
+        <button class="category-card art-research" type="button" data-board="research" aria-pressed="false">
+          <span class="category-art" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M12 31 40 15l28 16v5H12v-5Z" fill="#F4F0FF" stroke="#685CA8" stroke-width="3" stroke-linejoin="round"/><path d="M18 39h44M20 63h40M15 68h50M24 41v19m11-19v19m10-19v19m11-19v19" stroke="#685CA8" stroke-width="3" stroke-linecap="round"/><path d="M35 15V9h10v6" stroke="#9B8ED4" stroke-width="3" stroke-linecap="round"/></svg></span>
+          <span class="category-copy"><strong>文化科研院所</strong><small>高校 · 科研机构 · 文化组织</small><em><span data-board-count="research">0</span> 条资料 →</em></span>
+        </button>
       </div>
     </section>
     <nav class="mobile-nav" aria-label="快捷导航">
@@ -323,7 +328,7 @@
             <h2 id="timeline-heading">查询海南历史、地理与出行</h2>
             <span class="result-count" id="result-count" aria-live="polite"></span>
           </div>
-          <button class="back-to-topics" id="back-to-topics" type="button">← 返回七大板块</button>
+          <button class="back-to-topics" id="back-to-topics" type="button">← 返回主题板块</button>
         </div>
       </div>
       <nav class="filters" id="era-filters" aria-label="按历史时期筛选"></nav>
@@ -388,6 +393,7 @@
     import { referenceEntries } from "./reference-entries.js";
     import { templeHistoryEntries } from "./temple-history.js";
     import { cultureLandscapeEntries } from "./culture-landscape.js";
+    import { researchInstitutionEntries } from "./research-institutions.js";
     const periods = ["全部时期", "先秦至汉", "魏晋至宋元", "明清时期", "近现代", "当代"];
     let items = [
       { id: "han-commandery", period: "先秦至汉", type: "event", date: "公元前110年", title: "汉武帝设珠崖、儋耳郡", place: "海南岛", summary: "汉武帝元鼎六年，中央王朝在海南岛设置珠崖郡、儋耳郡，标志着对海南的郡县治理开始。", detail: "西汉在海南岛设置珠崖、儋耳两郡，郡县治所与辖境历来有史料考订。汉昭帝始元五年（公元前82年），珠崖郡因地方局势等原因被撤并。此后历代对海南的建置与实际治理多有变化。", note: "公元前110年为通行纪年，具体建置沿革可参照《汉书·地理志》及海南地方志。" },
@@ -420,7 +426,7 @@
       "free-trade-port": 2018
     };
     items.forEach(item => { item.year ??= knownYears[item.id] ?? 999999; });
-    items = [...items, ...maritimeEntries, ...architectureEntries, ...referenceEntries, ...templeHistoryEntries, ...cultureLandscapeEntries];
+    items = [...items, ...maritimeEntries, ...architectureEntries, ...referenceEntries, ...templeHistoryEntries, ...cultureLandscapeEntries, ...researchInstitutionEntries];
 
     const results = document.querySelector("#results");
     const search = document.querySelector("#search");
@@ -463,7 +469,8 @@
       ports: "港口码头",
       aviation: "机场航班",
       ferry: "轮渡铁路",
-      industry: "工厂企业"
+      industry: "工厂企业",
+      researchInstitutions: "文化科研院所"
     };
     const boards = {
       history: { title: "历史沿革与人物", categories: ["heritage"], types: ["person", "event"] },
@@ -472,7 +479,8 @@
       culture: { title: "黎族文化与非遗", categories: ["ethnicCulture"], types: [] },
       geography: { title: "海南地理与市县乡村", categories: ["administration", "villages"], types: [] },
       landscape: { title: "自然地貌与名胜", categories: ["landforms", "tourism", "architectureMaterials", "heritage"], types: [] },
-      transport: { title: "交通与产业", categories: ["ports", "aviation", "ferry", "industry"], types: ["trade"] }
+      transport: { title: "交通与产业", categories: ["ports", "aviation", "ferry", "industry"], types: ["trade"] },
+      research: { title: "文化科研院所", categories: ["researchInstitutions"], types: [] }
     };
     const tabs = document.querySelector(".type-tabs");
     const browsePanel = document.querySelector("#browse-panel");

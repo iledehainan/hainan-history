@@ -1,4 +1,4 @@
-const CACHE_NAME = "qiong-history-v6";
+const CACHE_NAME = "qiong-history-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const APP_SHELL = [
   "./reference-entries.js",
   "./temple-history.js",
   "./culture-landscape.js",
+  "./research-institutions.js",
   "./supabase-config.js",
   "./analytics-config.js",
   "./icons/qiong-app.svg",
