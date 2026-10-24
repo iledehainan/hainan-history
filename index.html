@@ -68,6 +68,18 @@
     .category-section { margin: 0 0 28px; }
     .category-heading { margin: 0 0 14px; }
     .category-heading p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .latest-update { margin: 0 0 28px; }
+    .latest-update[hidden] { display: none; }
+    .latest-update-card { display: flex; align-items: center; gap: 20px; width: 100%; min-height: 148px; padding: 16px; border: 1px solid var(--line); border-radius: 17px; color: var(--ink); background: var(--card); box-shadow: 0 7px 20px #19463d0a; text-align: left; transition: transform .16s ease, box-shadow .16s ease; }
+    .latest-update-card:hover { transform: translateY(-2px); box-shadow: 0 12px 26px #19463d15; }
+    .latest-update-card:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+    .latest-update-image { width: 220px; height: 146px; flex: 0 0 auto; border-radius: 11px; object-fit: cover; background: #edf3ef; }
+    .latest-update-image[hidden] { display: none; }
+    .latest-update-copy { display: grid; gap: 8px; min-width: 0; }
+    .latest-update-meta { color: var(--muted); font-size: 11px; }
+    .latest-update-title { font-size: 17px; font-weight: 750; line-height: 1.5; }
+    .latest-update-summary { color: var(--muted); font-size: 12px; line-height: 1.8; }
+    .latest-update-link { color: var(--green); font-size: 12px; font-weight: 750; }
     .category-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
     .category-card { display: grid; grid-template-columns: 82px minmax(0, 1fr); align-items: center; gap: 13px; min-height: 118px; padding: 13px; border: 1px solid var(--line); border-radius: 17px; color: var(--ink); background: var(--card); box-shadow: 0 7px 20px #19463d0a; text-align: left; transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
     .category-card:hover,.category-card[aria-pressed="true"] { transform: translateY(-2px); border-color: var(--art-color); box-shadow: 0 12px 26px #19463d15; }
@@ -176,6 +188,10 @@
       .stats { gap: 17px; margin-top: 14px; }
       .category-section { margin-bottom: 23px; }
       .category-heading { margin: 0 0 11px; }
+      .latest-update { margin-bottom: 23px; }
+      .latest-update-card { align-items: stretch; flex-direction: column; gap: 12px; padding: 12px; border-radius: 14px; }
+      .latest-update-image { width: 100%; height: auto; max-height: 220px; aspect-ratio: 16 / 9; }
+      .latest-update-title { font-size: 15px; }
       .category-grid { gap: 9px; }
       .category-card { grid-template-columns: 56px minmax(0, 1fr); gap: 9px; min-height: 96px; padding: 9px; border-radius: 14px; }
       .category-art { width: 56px; height: 66px; border-radius: 10px; }
@@ -243,6 +259,21 @@
         <span><strong id="item-total">0</strong>条查询资料</span>
         <span><strong id="era-total">0</strong>个时期</span>
       </div>
+    </section>
+    <section class="latest-update" id="latest-update" aria-labelledby="latest-update-heading" hidden>
+      <div class="category-heading">
+        <h2 id="latest-update-heading">最新更新</h2>
+        <p>每次新增或修改后，只展示最新的一条资料</p>
+      </div>
+      <button class="latest-update-card" id="latest-update-card" type="button">
+        <img class="latest-update-image" id="latest-update-image" alt="" hidden>
+        <span class="latest-update-copy">
+          <span class="latest-update-meta" id="latest-update-meta"></span>
+          <strong class="latest-update-title" id="latest-update-title"></strong>
+          <span class="latest-update-summary" id="latest-update-summary"></span>
+          <span class="latest-update-link">点击查看详情 →</span>
+        </span>
+      </button>
     </section>
     <section class="category-section" id="category-board" aria-labelledby="category-heading">
       <div class="category-heading">
@@ -398,6 +429,10 @@
     const resultCount = document.querySelector("#result-count");
     const eraFilters = document.querySelector("#era-filters");
     const dialog = document.querySelector("#detail-dialog");
+    const latestUpdateSection = document.querySelector("#latest-update");
+    const latestUpdateButton = document.querySelector("#latest-update-card");
+    const latestUpdateImage = document.querySelector("#latest-update-image");
+    let latestUpdatedItem = null;
     let selectedPeriod = "全部时期";
     let selectedType = "all";
     let selectedCategory = "all";
@@ -707,6 +742,29 @@
       document.querySelector("#dialog-close").focus();
     }
 
+    function renderLatestUpdate(item) {
+      latestUpdatedItem = item;
+      latestUpdateSection.hidden = !item;
+      if (!item) return;
+
+      const updatedDate = Date.parse(item.updated_at ?? "");
+      const updatedLabel = Number.isFinite(updatedDate)
+        ? ` · 更新于 ${new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "long", day: "numeric" }).format(updatedDate)}`
+        : "";
+      document.querySelector("#latest-update-meta").textContent = `${item.period} · ${item.date}${updatedLabel}`;
+      document.querySelector("#latest-update-title").textContent = item.title;
+      document.querySelector("#latest-update-summary").textContent = item.summary;
+      latestUpdateImage.hidden = !item.image_url;
+      latestUpdateImage.alt = item.image_url ? `${item.title}图片` : "";
+      latestUpdateImage.onerror = () => { latestUpdateImage.hidden = true; };
+      if (item.image_url) latestUpdateImage.src = item.image_url;
+      else latestUpdateImage.removeAttribute("src");
+    }
+
+    latestUpdateButton.addEventListener("click", () => {
+      if (latestUpdatedItem) showDetail(latestUpdatedItem, latestUpdateButton);
+    });
+
     function getFeedbackVisitorKey() {
       let key = localStorage.getItem(visitorKeyName);
       if (!key) {
@@ -835,6 +893,7 @@
 
     async function loadCloudItems() {
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        renderLatestUpdate(null);
         status.textContent = "云端资料库尚未配置；显示内置示例资料。";
         return;
       }
@@ -851,10 +910,15 @@
             return { ...localItem, ...entry, category: entry.category ?? localItem?.category, image_url: entry.image_url ?? localItem?.image_url };
           })
         ];
+        const latestEntry = data
+          .filter(entry => Number.isFinite(Date.parse(entry.updated_at ?? "")))
+          .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))[0];
+        renderLatestUpdate(latestEntry ? items.find(item => item.id === latestEntry.id) : null);
         status.textContent = `云端资料已同步 · 共 ${items.length} 条`;
         status.style.color = "#174c3c";
         render();
       } catch (error) {
+        renderLatestUpdate(null);
         status.textContent = `云端资料暂不可用：${error.message}（当前显示内置资料）`;
         status.style.color = "#a33d31";
       }
